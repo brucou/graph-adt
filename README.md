@@ -9,6 +9,7 @@ As such it is not and does not intend to be a all=purpose graph manipulation lib
  what we need for model-based testing.
  
 # API
+**TODO** update APIs signatures
 ## constructGraph :: Array<Edge> -> Optional<Array<Vertex>> -> Graph
 A graph is constructed by its array of edges. An edge itself is an array of two vertices. A 
 vertex can be anything. Note that this constructor is a bit restrictive. It is possible to think 
