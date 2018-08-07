@@ -31,7 +31,7 @@ export function findPaths(settings, s, t, graph) {
  */
 function findEdgesPaths(settings, edgePath, t, graph, traversalState) {
   const lastVertexInPath = getLastVertexInPath(graph, edgePath);
-  const {  maxNumberOfTraversals } = settings;
+  const { maxNumberOfTraversals } = settings;
   const { edgesVisited } = traversalState;
   const { outgoingEdges } = graph;
 
@@ -86,7 +86,7 @@ export function constructGraph(settings, edges, vertices) {
 
   // NOTE : we associated a numerical index to each vertex and edge.
   // This will be used for labelling or displaying purposes
-  vertices.forEach((vertex, index) => vertexMap.set(vertex, index));
+  (vertices || []).forEach((vertex, index) => vertexMap.set(vertex, index));
   edges.forEach((edge, index) => {
     edgeMap.set(edge, index);
 
