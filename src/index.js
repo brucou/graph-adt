@@ -1,34 +1,48 @@
-import { getLastVertexInPath, isEdgeInEdgePath, isVertexEqual } from "./helpers"
+import { getLastVertexInPath, isEdgeInEdgePath, isVertexEqual, print } from "./helpers"
 
 export * from './types'
 export * from './properties'
 export * from './helpers'
 
+/**
+ *
+ * @param {FindPathSettings} settings
+ * @param {Vertex} s
+ * @param {Vertex} t
+ * @param {Graph} graph
+ * @returns {Array}
+ */
 export function findPaths(settings, s, t, graph) {
-  return findEdgesPaths(settings, [s], t, graph, { edgesVisited: new Map(), allFoundPaths: [] })
+  const { constructEdge } = graph;
+  const traversalState = { edgesVisited: new Map(), allFoundPaths: [] };
+  findEdgesPaths(settings, [constructEdge(null, s)], t, graph, traversalState);
+
+  return traversalState.allFoundPaths
 }
 
 /**
  * Prints all paths which end in t and can be obtained by adding vertices to path `edgePath`
- * @param edgePath
- * @param t
- * @param graph
+ * @param {EdgePath} edgePath
+ * @param {Vertex} t
+ * @param {Graph} graph
  * @param {FindPathSettings} settings
  * @param {TraversalState} traversalState
  * @return {Array}
  */
 function findEdgesPaths(settings, edgePath, t, graph, traversalState) {
   const lastVertexInPath = getLastVertexInPath(graph, edgePath);
-  const { maxNumberOfCircleTraversal } = settings;
+  const {  maxNumberOfTraversals } = settings;
   const { edgesVisited } = traversalState;
-  const { getOutgoingEdges } = graph;
+  const { outgoingEdges } = graph;
 
-  getOutgoingEdges(lastVertexInPath).forEach(edge => {
+  outgoingEdges(lastVertexInPath).forEach(edge => {
+    if (!edgesVisited.has(edge)) {
+      edgesVisited.set(edge, {})
+    }
     if (isEdgeInEdgePath(edgePath, edge)) {
-      const timesCircledOn = edgesVisited.get(edge).timesCircledOn;
-      edgesVisited.set(edge, { timesCircledOn: timesCircledOn + 1 });
+      const timesCircledOn = edgePath.reduce((acc, edgeInEdgePath) => edgeInEdgePath === edge ? acc + 1 : acc, 0);
 
-      if (timesCircledOn + 1 >= maxNumberOfCircleTraversal) {
+      if (timesCircledOn >= (maxNumberOfTraversals || 1)) {
         // No more circling on that edge, there is no path here to be added
       }
       else {
@@ -39,8 +53,6 @@ function findEdgesPaths(settings, edgePath, t, graph, traversalState) {
       addPaths(settings, edgePath, t, graph, traversalState, edge)
     }
   });
-
-  return traversalState.allFoundPaths
 }
 
 function addPaths(settings, edgePath, t, graph, traversalState, edge) {
@@ -52,20 +64,21 @@ function addPaths(settings, edgePath, t, graph, traversalState, edge) {
     traversalState.allFoundPaths = traversalState.allFoundPaths.concat([newPath]);
   }
   else {
-    traversalState.allFoundPaths = traversalState.allFoundPaths.concat(findEdgesPaths(settings, newPath, t, graph, traversalState))
+    findEdgesPaths(settings, newPath, t, graph, traversalState)
   }
 }
 
 /**
  *
  * @param {Array<Edge>} edges
- * @param vertices
- * @return {{outgoingEdges}}
- * @param {Graph} settings
- * CONTRACT : cannot have in vertices two equal (referential equality) vertices
+ * @param {Array<Vertex>} vertices array of **unique** vertices (sameness is referential equality)
+ * @param {EdgeADT} settings
+ * @return {Graph}
+ * CONTRACT : cannot have in `vertices` two equal (referential equality) vertices
+ * CONTRACT : vertex, edge must be object (because of WeakMap)
  */
 export function constructGraph(settings, edges, vertices) {
-  const { getEdgeTarget, getEdgeOrigin } = settings;
+  const { getEdgeTarget, getEdgeOrigin, constructEdge } = settings;
   const vertexMap = new WeakMap();
   const edgeMap = new WeakMap();
   const outgoingEdges = new WeakMap();
@@ -79,8 +92,11 @@ export function constructGraph(settings, edges, vertices) {
 
     const s = getEdgeOrigin(edge);
     const t = getEdgeTarget(edge);
+    if (!vertexMap.has(s)) throw `constructGraph : origin vertex for edge #${index} referenced in edges but not referenced in vertices!`
+    if (!vertexMap.has(t)) throw `constructGraph : target vertex for edge #${index} referenced in edges but not referenced in vertices!`
+
     const outgoingEdgeList = outgoingEdges.get(s) || [];
-    const incomingEdgeList = outgoingEdges.get(s) || [];
+    const incomingEdgeList = incomingEdges.get(t) || [];
     outgoingEdges.set(s, outgoingEdgeList.concat([edge]));
     incomingEdges.set(t, incomingEdgeList.concat([edge]));
   });
@@ -89,12 +105,13 @@ export function constructGraph(settings, edges, vertices) {
     outgoingEdges: (vertex) => outgoingEdges.get(vertex) || [],
     incomingEdges: (vertex) => incomingEdges.get(vertex) || [],
     // NOTE : reuses `toString` method of Vertex
-    showVertex: (vertex) => `Vertex #${vertexMap.get(vertex)} : ${vertex}`,
-    showEdge: (edge) => `Edge #${vertexMap.get(edge)} : ${edge}`,
+    showVertex: (vertex) => `Vertex #${vertexMap.get(vertex)} : ${print(vertex)}`,
+    showEdge: (edge) => `Edge #${edgeMap.get(edge)} : ${print(edge)}`,
     vertices,
     edges,
     getEdgeTarget,
-    getEdgeOrigin
+    getEdgeOrigin,
+    constructEdge
   }
 }
 

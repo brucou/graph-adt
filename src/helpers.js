@@ -17,7 +17,7 @@ export function isVertexEqual(s, t) {
  * @returns {*}
  */
 export function getLastVertexInPath(graph, edgePath) {
-  const { getEdgeTarget } = graph;
+  const { getEdgeTarget, constructEdge} = graph;
   const lastEdge = edgePath[edgePath.length - 1];
 
   return getEdgeTarget(lastEdge)
@@ -25,4 +25,13 @@ export function getLastVertexInPath(graph, edgePath) {
 
 export function isEdgeInEdgePath(edgePath, edge) {
   return edgePath.includes(edge)
+}
+
+export function print(obj) {
+  if (obj.print && typeof obj.print === 'function') {
+    return obj.print(obj)
+  }
+  else {
+    return JSON.stringify(obj)
+  }
 }

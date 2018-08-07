@@ -16,6 +16,7 @@
  * @typedef {Object} EdgeADT
  * @property {function(Edge) : Vertex} getEdgeTarget
  * @property {function(Edge) : Vertex} getEdgeOrigin
+ * @property {function(Vertex, Vertex) : Edge} constructEdge
  */
 /**
  * @typedef {Object} Graph
@@ -27,10 +28,11 @@
  * @property {function (Vertex) : Array<Vertex>} settings
  * @property {function (Edge) : Vertex} getEdgeOrigin
  * @property {function (Edge) : Vertex} getEdgeTarget
+ * @property {function(Vertex, Vertex) : Edge} constructEdge
  * @property {function (Vertex) : ()} showVertex
  * @property {function (Vertex) : ()} showEdge
  */
 /**
  * @typedef {Object} FindPathSettings
- * @property {Number} maxNumberOfCircleTraversal a number greater or equal to 0
+ * @property {Number} [maxNumberOfTraversals=1] a number greater or equal to 0. Set to 1 by default
  */
