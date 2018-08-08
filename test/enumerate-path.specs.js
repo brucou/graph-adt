@@ -72,7 +72,7 @@ QUnit.test("paths(s,s) : Ignores self-loops on target vertex", function exec_tes
   const edges = [edge1, edge2, edge3, edge4];
   const graph = constructGraph(settings, edges, vertices);
 
-  const findPathSettings = { maxNumberOfCircleTraversal: 2 };
+  const findPathSettings = { maxNumberOfTraversals: 2 };
 
   assert.deepEqual(findPaths(findPathSettings, vertex1, vertex1, graph), [
     [
@@ -105,7 +105,7 @@ QUnit.test("paths(s, s) : Multi-self-loops are correctly enumerated when the tar
   const edges = [edge1, edge2, edge3, edge4];
   const graph = constructGraph(settings, edges, vertices);
 
-  const findPathSettings = { maxNumberOfCircleTraversal: 2 };
+  const findPathSettings = { maxNumberOfTraversals: 2 };
 
   assert.deepEqual(findPaths(findPathSettings, vertex2, vertex2, graph),
     [
@@ -221,4 +221,21 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
     [6, 2, 4, 5],
     [6, 2, 5]
   ], `no more than maxNumberOfTraversal repetition for the same edge in a given path`);
+});
+
+QUnit.test("paths(s,t) : no paths!", function exec_test(assert) {
+  const vertex1 = { v: 'v' };
+  const vertex2 = { w: 'w' };
+  const vertex3 = { u: 'u' };
+  const vertices = [vertex1, vertex2, vertex3];
+  const edge1 = { origin: vertices[0], target: vertices[0] };
+  const edge2 = { origin: vertices[0], target: vertices[1] };
+  const edge3 = { origin: vertices[1], target: vertices[1] };
+  const edge4 = { origin: vertices[2], target: vertices[2] };
+  const edges = [edge1, edge2, edge3, edge4];
+  const graph = constructGraph(settings, edges, vertices);
+
+  const findPathSettings = { maxNumberOfTraversals: 1 };
+
+  assert.deepEqual(findPaths(findPathSettings, vertex1, vertex3, graph), [], `If there is no path between the two vertices, an empty array is returned`);
 });
