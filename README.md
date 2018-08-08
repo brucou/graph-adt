@@ -44,6 +44,7 @@ most of the above-mentioned coverage criteria.
  
 # API
 ## Types
+```javascript
 /**
  * @typedef {Object} Edge must be an object (we use referential equality so this is to avoid surprises with
  * equality of native types)
@@ -79,6 +80,7 @@ most of the above-mentioned coverage criteria.
  * @typedef {Object} FindPathSettings
  * @property {Number} [maxNumberOfTraversals=1] a number greater or equal to 0. Set to 1 by default
  */
+```
 
 ## Contracts
 Both edges and vertices must be objects! The good behaviour of the library is not guaranteed for 
