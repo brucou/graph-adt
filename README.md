@@ -116,8 +116,7 @@ are unique, i.e. there are no two same paths, with sameness defined by referenti
 the contained edges.
 
 It is possible to configure the maximum number of occurrences of a given edge in a path. Sameness
- is defined by referential equality. The default value is set to 1 (no repetition of a given edge
-  - this ensures loop-free paths). Settings that parameter to a value greater than 1 allows to 
+ is defined by referential equality. The default value is set to 1 (no repetition of a given edge - this ensures loop-free paths). Settings that parameter to a value greater than 1 allows to 
   have some control over the traversal of the graph cycles.
 
 **Note that the first edge** in any returned path has a `null` vertex as origin vertex. Keep that
