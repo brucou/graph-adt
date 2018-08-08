@@ -9,7 +9,7 @@ As such it is not and does not intend to be a all-purpose graph manipulation lib
  what we need for model-based testing. Typically, the model coverage criteria used in MBT for 
  transition-based models are :
  
- - **all paths:* Every path traversed at
+ - **all paths:** Every path traversed at
                  least once (exhaustive
                  testing of control structure) 
    - **all transition pairs:** Every pair of adjacent
@@ -30,7 +30,7 @@ As such it is not and does not intend to be a all-purpose graph manipulation lib
                              (transition coverage
                              required) 
      - **all loop-free paths:** Every loop-free (no
-                                 repetition of config./
+                                 repetition of config/
                                  states) path traversed
                                  at least once   
  
@@ -124,6 +124,6 @@ It is possible to configure the maximum number of occurrences of a given edge in
 
 ## Algorithm
 We did not bother much with sophisticated algorithm. A collection of such can be found in the 
-directory. We use a recursive, brute force enumeration algorithm, adapted for the need of 
+directory. We use a recursive, brute-force enumeration algorithm, adapted for the need of 
 enumerate cycles and loops. 
 
