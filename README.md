@@ -5,31 +5,31 @@ as a state-machine, which itself can be modelled as a [multigraph](https://en.wi
 input sequences for model testing, we need to examine the associated graph in a certain number 
 of ways. This library aims at gathering such ways.
 
-As such it is not and does not intend to be a all=purpose graph manipulation library. It just has
+As such it is not and does not intend to be a all-purpose graph manipulation library. It just has
  what we need for model-based testing. Typically, the model coverage criteria used in MBT for 
  transition-based models are :
  
  - **all paths:* Every path traversed at
                  least once (exhaustive
                  testing of control structure) 
-   - **all transition pairs: ** Every pair of adjacent
+   - **all transition pairs:** Every pair of adjacent
                                 transitions traversed
                                 at least once 
-     - **all transitions: ** Every transition of
+     - **all transitions:** Every transition of
                              the model traversed
                              at least once
-   - **all states: ** Every state is visited
+   - **all states:** Every state is visited
                       at least once 
-   - **all one-loop paths: ** Visit all the loop-free
+   - **all one-loop paths:** Visit all the loop-free
                             paths plus all the
                             paths that loop once 
-     - **all round trips: ** Test each loop
+     - **all round trips:** Test each loop
                              (iterate only once),
                              but no need to check
                              all paths preceding or following a loop
                              (transition coverage
                              required) 
-     - **all loop-free paths: ** Every loop-free (no
+     - **all loop-free paths:** Every loop-free (no
                                  repetition of config./
                                  states) path traversed
                                  at least once   
