@@ -10,7 +10,7 @@
  * equality of native types)
  */
 /**
- * @typedef {{allFoundPaths : Array<EdgePath>, edgesVisited : Map}} TraversalState
+ * @typedef {{allFoundPaths : Array<EdgePath>}} TraversalState
  */
 /**
  * @typedef {Object} EdgeADT
@@ -35,4 +35,12 @@
 /**
  * @typedef {Object} FindPathSettings
  * @property {Number} [maxNumberOfTraversals=1] a number greater or equal to 0. Set to 1 by default
+ */
+/**
+ * @typedef {Object} Store
+ * @property {*} empty empty store or constructor for an empty store
+ * @property {function (Array<>, Store) : ()} add adds values into a store
+ * @property {function (Store) : *} takeAndRemoveOne empty store. removes one value from the store and returns that
+ * value
+ * @property {function (Store): Boolean} isEmpty predicate which returns true iff the store is empty
  */

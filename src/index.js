@@ -1,8 +1,13 @@
-import { getLastVertexInPath, isEdgeInEdgePath, isVertexEqual, print } from "./helpers"
+import { clone, getLastVertexInPath, isEdgeInEdgePath, isVertexEqual, merge, print } from "./helpers"
 
 export * from './types'
 export * from './properties'
 export * from './helpers'
+export * from './types'
+
+///// Utility functions
+// Cheap cloning, which is enough for our needs : we only clone seeds and empty values, which are generally simple
+// objects
 
 /**
  *
@@ -14,7 +19,7 @@ export * from './helpers'
  */
 export function findPaths(settings, s, t, graph) {
   const { constructEdge } = graph;
-  const traversalState = { edgesVisited: new Map(), allFoundPaths: [] };
+  const traversalState = { allFoundPaths: [] };
   findEdgesPaths(settings, [constructEdge(null, s)], t, graph, traversalState);
 
   return traversalState.allFoundPaths
@@ -32,13 +37,9 @@ export function findPaths(settings, s, t, graph) {
 function findEdgesPaths(settings, edgePath, t, graph, traversalState) {
   const lastVertexInPath = getLastVertexInPath(graph, edgePath);
   const { maxNumberOfTraversals } = settings;
-  const { edgesVisited } = traversalState;
   const { outgoingEdges } = graph;
 
   outgoingEdges(lastVertexInPath).forEach(edge => {
-    if (!edgesVisited.has(edge)) {
-      edgesVisited.set(edge, {})
-    }
     if (isEdgeInEdgePath(edgePath, edge)) {
       const timesCircledOn = edgePath.reduce((acc, edgeInEdgePath) => edgeInEdgePath === edge ? acc + 1 : acc, 0);
 
@@ -115,3 +116,80 @@ export function constructGraph(settings, edges, vertices) {
   }
 }
 
+/**
+ *
+ * @param {{store: Store, traverse: {visit, startingEdge, pickTraversableEdges, seed}}} traversalSpecs
+ * @param {Graph} graph
+ * @returns {*} the accumulated result of the visit while traversing
+ */
+export function visitGraphEdges(traversalSpecs, graph) {
+  const { store, traverse } = traversalSpecs;
+  const { empty: emptyOrEmptyConstructor, add, takeAndRemoveOne, isEmpty } = store;
+  const { outgoingEdges: getOutgoingEdges } = graph;
+  const { seed: seedOrSeedConstructor, visit, startingEdge, pickTraversableEdges, } = traverse;
+
+  // CONTRACT : startingEdge must be in edge array
+  if (!graph.edges.includes(startingEdge)) throw `visitGraphEdges : startingEdge must be in edge array!`
+
+  const graphTraversalState = new Map();
+  // NOTE : This allows to have seeds which are non-JSON objects, such as new Map(). We force a new here to make
+  // sure we have an object that cannot be modified out of the scope of visitTree and collaborators
+  const seed = (typeof seedOrSeedConstructor === 'function')
+    ? new (seedOrSeedConstructor())
+    : clone(seedOrSeedConstructor);
+  const emptyStore = (typeof emptyOrEmptyConstructor === 'function')
+    ? new (emptyOrEmptyConstructor())
+    : clone(emptyOrEmptyConstructor);
+
+  let currentStore = emptyStore;
+  let visitAcc = seed;
+  add([startingEdge], currentStore);
+  // NOTE : having the number of times an edge is visited is so common in many algorithm
+  // that we include it here de facto.
+  graphTraversalState.set(startingEdge, { timesVisited: 0 });
+
+  while ( !isEmpty(currentStore) ) {
+    const edge = takeAndRemoveOne(currentStore);
+    const outgoingEdges = getOutgoingEdges(edge);
+    const newEdgesToTraverse = pickTraversableEdges(outgoingEdges, graphTraversalState, graph);
+
+    add(newEdgesToTraverse, currentStore);
+    visitAcc = visit(visitAcc, graphTraversalState, edge, graph);
+    updateVisitInTraversalState(graphTraversalState, edge);
+  }
+
+  // Free the references to the tree/subtrees
+  graphTraversalState.clear();
+
+  return visitAcc;
+}
+
+/**
+ *
+ * @param {Map} traversalState
+ * @param {Edge} edge
+ * @returns
+ * @modifies {traversalState}
+ */
+function updateVisitInTraversalState(traversalState, edge) {
+  const edgeTraversalState = traversalState.get(edge);
+  const timesVisited = edgeTraversalState.timesVisited;
+  traversalState.set(
+    edge,
+    merge(edgeTraversalState, { timesVisited: timesVisited + 1 })
+  );
+}
+
+export function breadthFirstTraverseGraphEdges(traverse, graph) {
+  const traversalSpecs = {
+    store: {
+      empty: [],
+      takeAndRemoveOne: store => store.shift(),
+      isEmpty: store => store.length === 0,
+      add: (subTrees, store) => store.push.apply(store, subTrees)
+    },
+    traverse
+  };
+
+  return visitGraphEdges(traversalSpecs, graph);
+}

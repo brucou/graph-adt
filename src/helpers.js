@@ -35,3 +35,11 @@ export function print(obj) {
     return JSON.stringify(obj)
   }
 }
+
+export function clone(a) {
+  return a === undefined ? undefined : JSON.parse(JSON.stringify(a))
+}
+
+export function merge(objA, objB) {
+  return Object.assign({}, objA, objB);
+}
