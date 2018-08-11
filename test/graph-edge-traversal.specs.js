@@ -20,7 +20,8 @@ const graph = constructGraph(settings, edges, vertices);
 
 QUnit.module("Testing breadthFirstTraverseGraphEdges(traverse, graph)", {});
 
-QUnit.test("Edge case : no edge, no vertices", function exec_test(assert) {
+// TODO later
+QUnit.skip("Edge case : no edge, no vertices", function exec_test(assert) {
   const edges = [];
   const vertices = [];
   const graph = constructGraph(settings, edges, vertices);
@@ -30,13 +31,15 @@ QUnit.test("Edge case : no edge, no vertices", function exec_test(assert) {
     pickTraversableEdges: x => x,
     seed: {}
   };
-  const traversalResult = breadthFirstTraverseGraphEdges(traverse, graph);
 
   // TODO this is a throw
-  assert.deepEqual(traversalResult, [], `It is not possible to traverse an empty graph!`);
+  assert.throws(
+    function () { breadthFirstTraverseGraphEdges(traverse, graph) },
+    /visitGraphEdges/, `It is not possible to traverse an empty graph!`);
 });
 
-QUnit.test("multigraph - no cycle allowed", function exec_test(assert) {
+// TODO later
+QUnit.skip("multigraph - no cycle allowed", function exec_test(assert) {
   const maxTimesVisited = 1;
   const traverse = {
     seed: [],
@@ -51,5 +54,23 @@ QUnit.test("multigraph - no cycle allowed", function exec_test(assert) {
   };
   const traversalResult = breadthFirstTraverseGraphEdges(traverse, graph);
 
-  assert.deepEqual(traversalResult, [], `Graph is traversed without occuring into any cycle`);
+  assert.deepEqual(traversalResult, [], `Graph is traversed without occurring into any cycle`);
+});
+
+QUnit.skip("multigraph - 1 cycle allowed", function exec_test(assert) {
+  const maxTimesVisited = 2;
+  const traverse = {
+    seed: [],
+    visit: (visitAcc, graphTraversalState, edge, graph) => {
+      const timesVisited = graphTraversalState.get(edge).timesVisited;
+      return visitAcc.concat(`Edge #${edge.id} visited ${timesVisited} times`)
+    },
+    startingEdge: [], // NOTE : does not matter, the graph is empty
+    pickTraversableEdges: (outgoingEdges, graphTraversalState, graph) => {
+      return outgoingEdges.filter(edge => graphTraversalState.get(edge).timesVisited < maxTimesVisited)
+    },
+  };
+  const traversalResult = breadthFirstTraverseGraphEdges(traverse, graph);
+
+  assert.deepEqual(traversalResult, [], `Graph is traversed, including cycle paths`);
 });
