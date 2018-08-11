@@ -1,7 +1,6 @@
 import * as QUnit from "qunitjs"
 import { breadthFirstTraverseGraphEdges, constructGraph } from "../src"
 
-// TODO
 let edgeCounter = 0;
 const settings = {
   getEdgeTarget: x => x.target,
