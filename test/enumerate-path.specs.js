@@ -1,17 +1,18 @@
 import * as QUnit from "qunitjs"
-import { constructGraph, findPaths } from "../src"
+import { constructGraph, findPathsBetweenVertices } from "../src"
 
-const settings = {
+const graphSettings = {
   getEdgeTarget: x => x.target,
   getEdgeOrigin: x => x.origin,
   constructEdge: (s, t) => ({ origin: s, target: t })
 };
+
 QUnit.module("Testing constructGraph(settings, edges, vertices)", {});
 
 QUnit.test("no edge, no vertices", function exec_test(assert) {
   const edges = [];
   const vertices = [];
-  const graph = constructGraph(settings, edges, vertices);
+  const graph = constructGraph(graphSettings, edges, vertices);
 
   assert.deepEqual(Object.keys(graph), [
     "outgoingEdges",
@@ -35,7 +36,7 @@ QUnit.test("edge, vertices", function exec_test(assert) {
   const edge3 = { origin: vertices[1], target: vertices[1] };
   const edge4 = { origin: vertices[1], target: vertices[1] };
   const edges = [edge1, edge2, edge3, edge4];
-  const graph = constructGraph(settings, edges, vertices);
+  const graph = constructGraph(graphSettings, edges, vertices);
 
   assert.deepEqual(JSON.parse(JSON.stringify(graph.outgoingEdges(vertex1))), [
     { "origin": { "v": "v" }, "target": { "v": "v" } },
@@ -70,11 +71,11 @@ QUnit.test("paths(s,s) : Ignores self-loops on target vertex", function exec_tes
   const edge3 = { origin: vertices[1], target: vertices[1] };
   const edge4 = { origin: vertices[1], target: vertices[1] };
   const edges = [edge1, edge2, edge3, edge4];
-  const graph = constructGraph(settings, edges, vertices);
+  const graph = constructGraph(graphSettings, edges, vertices);
 
   const findPathSettings = { maxNumberOfTraversals: 2 };
 
-  assert.deepEqual(findPaths(findPathSettings, vertex1, vertex1, graph), [
+  assert.deepEqual(findPathsBetweenVertices(findPathSettings, graph, vertex1, vertex1), [
     [
       {
         "origin": null,
@@ -103,11 +104,11 @@ QUnit.test("paths(s, s) : Multi-self-loops are correctly enumerated when the tar
   const edge3 = { origin: vertices[1], target: vertices[1] };
   const edge4 = { origin: vertices[1], target: vertices[1] };
   const edges = [edge1, edge2, edge3, edge4];
-  const graph = constructGraph(settings, edges, vertices);
+  const graph = constructGraph(graphSettings, edges, vertices);
 
   const findPathSettings = { maxNumberOfTraversals: 2 };
 
-  assert.deepEqual(findPaths(findPathSettings, vertex2, vertex2, graph),
+  assert.deepEqual(findPathsBetweenVertices(findPathSettings, graph, vertex2, vertex2),
     [
       [
         {
@@ -153,11 +154,11 @@ QUnit.test("paths(s, t) : self-loops on target vertex are ignored and paths are 
   const edge3 = { origin: vertices[1], target: vertices[1] };
   const edge4 = { origin: vertices[1], target: vertices[1] };
   const edges = [edge1, edge2, edge3, edge4];
-  const graph = constructGraph(settings, edges, vertices);
+  const graph = constructGraph(graphSettings, edges, vertices);
 
   const findPathSettings = { maxNumberOfTraversals: 2 };
 
-  assert.deepEqual(findPaths(findPathSettings, vertex1, vertex2, graph), [
+  assert.deepEqual(findPathsBetweenVertices(findPathSettings, graph, vertex1, vertex2), [
     [
       { "origin": null, "target": { "v": "v" } },
       { "origin": { "v": "v" }, "target": { "v": "v" } },
@@ -195,7 +196,7 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
   const graph = constructGraph(settings, edges, vertices);
 
   const findPathSettings = { maxNumberOfTraversals: 2 };
-  const foundPaths = findPaths(findPathSettings, vertex1, vertex1, graph);
+  const foundPaths = findPathsBetweenVertices(findPathSettings, graph, vertex1, vertex1);
 
   const foundIdPaths = foundPaths.map(path => path.map(x => x.id));
 
@@ -233,9 +234,9 @@ QUnit.test("paths(s,t) : no paths!", function exec_test(assert) {
   const edge3 = { origin: vertices[1], target: vertices[1] };
   const edge4 = { origin: vertices[2], target: vertices[2] };
   const edges = [edge1, edge2, edge3, edge4];
-  const graph = constructGraph(settings, edges, vertices);
+  const graph = constructGraph(graphSettings, edges, vertices);
 
   const findPathSettings = { maxNumberOfTraversals: 1 };
 
-  assert.deepEqual(findPaths(findPathSettings, vertex1, vertex3, graph), [], `If there is no path between the two vertices, an empty array is returned`);
+  assert.deepEqual(findPathsBetweenVertices(findPathSettings, graph, vertex1, vertex3), [], `If there is no path between the two vertices, an empty array is returned`);
 });
