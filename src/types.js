@@ -35,6 +35,7 @@
 /**
  * @typedef {Object} FindPathSettings
  * @property {Number} [maxNumberOfTraversals=1] a number greater or equal to 0. Set to 1 by default
+ * @property {String} [strategy='BFS'] search strategy : depth-first or breadth-first (default)
  */
 /**
  * @typedef {Object} Store
@@ -43,4 +44,33 @@
  * @property {function (Store) : *} takeAndRemoveOne empty store. removes one value from the store and returns that
  * value
  * @property {function (Store): Boolean} isEmpty predicate which returns true iff the store is empty
+ */
+
+/**
+ * @typedef {Map} GraphTraversalState `graphTraversalState` is shared state between search, result accumulation and
+ * visiting functions. As such it must be used carefully. Ideally it is not necessary. If it is necessary then only
+ * one function should modify it while the others read from it. That eliminates the need to think about order of
+ * function application.
+ */
+/**
+ * @typedef {Object} SearchSpecs
+ * @property {function (Edge, EdgesPaths, Graph, GraphTraversalState) : Boolean} isGoalReached predicate which
+ * assesses whether a sequence of edges realize the search goal, or if instead the search should continue
+ * @property {function (Edge, EdgesPaths, Graph, GraphTraversalState) : Boolean} isTraversableEdge predicate which
+ * examines whether a given edge should be traversed i.e. included in the search
+ */
+/**
+ * @typedef {{path : EdgePath, edgesPathState:*}} EdgesPaths
+ */
+/**
+ * @typedef {function (Result, EdgesPaths, GraphTraversalState, graph: Graph) : Result} ReducerResult
+ */
+/**
+ * @typedef {{initialEdgesPathState:*, visitEdge : ReducerEdge}} VisitSpecs
+ */
+/**
+ * @typedef {function (*, EdgePath, GraphTraversalState) : *} ReducerEdge
+ */
+/**
+ * @typedef {*} Result
  */

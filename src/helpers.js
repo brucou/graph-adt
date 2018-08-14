@@ -72,3 +72,14 @@ export const queueStore = {
   isEmpty: store => store.length === 0,
   add: (subTrees, store) => store.concat(subTrees)
 }
+
+export const stackStore = {
+  empty: [],
+  takeAndRemoveOne: store => ({popped : store[0], newStore: store.slice(1)}),
+  isEmpty: store => store.length === 0,
+  // NOTE : vs. bfs, only `add` changes
+  add: (subTrees, store) => subTrees.concat(store)
+};
+
+export const BFS = 'BFS'
+export const DFS = 'DFS'

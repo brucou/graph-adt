@@ -1,6 +1,7 @@
 import {
-  computeTimesCircledOn, getLastVertexInPath, isFunction, isTargetEdgeReached, merge, print, queueStore,
-  shouldEdgeBeTraversedYetAgain
+  BFS,
+  computeTimesCircledOn, DFS, getLastVertexInPath, isFunction, isTargetEdgeReached, merge, print, queueStore,
+  shouldEdgeBeTraversedYetAgain, stackStore
 } from "./helpers"
 
 export * from './types'
@@ -25,15 +26,6 @@ export function findPathsBetweenVertices({ maxNumberOfTraversals }, graph, s, t)
   };
   const traversalState = { allFoundPaths: [] };
   findEdgesPaths(settings, graph, [constructEdge(null, s)], t, traversalState);
-
-  // store = [[constructEdge(null, s)]]
-  // pop one edge path
-  // foreach outgoing edges of target vertex(edge path)
-  //   if isTraversableEdge and isGoalReached
-  //     update traversalState (reducer)
-  //   if isTraversableEdge and !isGoalReached
-  //     push the edge path [edge, outgoing edge]
-  // stop when store empty
 
   return traversalState.allFoundPaths
 }
@@ -117,36 +109,6 @@ export function constructGraph(settings, edges, vertices) {
 }
 
 /**
- * @typedef {Map} GraphTraversalState `graphTraversalState` is shared state between search, result accumulation and
- * visiting functions. As such it must be used carefully. Ideally it is not necessary. If it is necessary then only
- * one function should modify it while the others read from it. That eliminates the need to think about order of
- * function application.
- */
-/**
- * @typedef {Object} SearchSpecs
- * @property {function (Edge, EdgesPaths, Graph, GraphTraversalState) : Boolean} isGoalReached predicate which
- * assesses whether a sequence of edges realize the search goal, or if instead the search should continue
- * @property {function (Edge, EdgesPaths, Graph, GraphTraversalState) : Boolean} isTraversableEdge predicate which
- * examines whether a given edge should be traversed i.e. included in the search
- */
-/**
- * @typedef {{path : EdgePath, edgesPathState:*}} EdgesPaths
- */
-/**
- * @typedef {function (Result, EdgesPaths, GraphTraversalState, graph: Graph) : Result} ReducerResult
- */
-/**
- * @typedef {{initialEdgesPathState:*, visitEdge : ReducerEdge}} VisitSpecs
- */
-/**
- * @typedef {function (*, EdgePath, GraphTraversalState) : *} ReducerEdge
- */
-
-/**
- * @typedef {*} Result
- */
-
-/**
  * Starting from an initial edge, (brute-force) iteratively search the graph traversing edges which fulfill some
  * conditions (`isTraversableEdge`), till a goal is reached (`isGoalReached`).
  * Search results are accumulated via a provided reducer function (`addSearchResult`).
@@ -156,6 +118,7 @@ export function constructGraph(settings, edges, vertices) {
  * @returns {*} the accumulated result of the searches
  */
 export function searchGraphEdges(traversalSpecs, startingEdge, graph) {
+  // TODO : API put graphTraversalState always last arg, I hardly ever use it
   const { store, traverse } = traversalSpecs;
   const { empty: storeConstructor, add, isEmpty } = store;
   const { results, visit } = traverse;
@@ -197,16 +160,16 @@ function traverseNext(searchResults, store, graphTraversalState, traversalSpecs,
   const { outgoingEdges: getOutgoingEdges, getEdgeTarget } = graph;
 
   // TODO :  write VisitEdge the last edge (even when given the whole array)
-  // TODO make sure that edgePAthState or visitEdge has access to the transformed state machines and other
+  // TODO make sure that edgePathState or visitEdge has access to the transformed state machines and other
   const { popped: edgesPaths, newStore } = takeAndRemoveOne(store);
   const { path: edges, edgesPathState } = edgesPaths;
   const lastEdge = edges[edges.length - 1];
   edgesPaths.edgesPathState = visitEdge(edgesPathState, edges, graphTraversalState);
 
-  if (!isTraversableEdge(lastEdge, edgesPaths, graph, graphTraversalState)) return { searchResults, newStore };
+  if (!isTraversableEdge(lastEdge, edgesPaths, graph, graphTraversalState)) return { searchResults, store : newStore };
   if (isGoalReached(lastEdge, edgesPaths, graph, graphTraversalState)) {
     const newSearchResults = addSearchResult(searchResults, edgesPaths, graphTraversalState, graph);
-    return { searchResults: newSearchResults, newStore }
+    return { searchResults: newSearchResults, store:newStore }
   }
   else {
     const lastVertexOnEdgePath = getEdgeTarget(lastEdge);
@@ -221,22 +184,6 @@ function traverseNext(searchResults, store, graphTraversalState, traversalSpecs,
   }
 }
 
-/**
- *
- * @param {Map} traversalState
- * @param {Edge} edge
- * @returns
- * @modifies {traversalState}
- */
-function updateVisitInTraversalState(traversalState, edge) {
-  const edgeTraversalState = traversalState.get(edge);
-  const timesVisited = edgeTraversalState.timesVisited;
-  traversalState.set(
-    edge,
-    merge(edgeTraversalState, { timesVisited: timesVisited + 1 })
-  );
-}
-
 export function breadthFirstTraverseGraphEdges(traverse, startingEdge, graph) {
   const traversalSpecs = {
     store: queueStore,
@@ -246,7 +193,18 @@ export function breadthFirstTraverseGraphEdges(traverse, startingEdge, graph) {
   return searchGraphEdges(traversalSpecs, startingEdge, graph);
 }
 
-// TODO : do also immutable store for depthFirstSearch!!
+export function depthFirstTraverseGraphEdges(traverse, startingEdge, graph) {
+  const traversalSpecs = {
+    store: stackStore,
+    traverse
+  };
+
+  return searchGraphEdges(traversalSpecs, startingEdge, graph);
+}
+
+// DOC : with this algorithm, traversing a graph like in
+// https://stackoverflow.com/questions/36488968/post-order-graph-traversal will leave the vertex 3 unscanned!
+
 /**
  *
  * @param {FindPathSettings} settings
@@ -257,55 +215,44 @@ export function breadthFirstTraverseGraphEdges(traverse, startingEdge, graph) {
  */
 export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   const { constructEdge } = graph;
-  const { maxNumberOfTraversals } = settings;
-  const startingEdge = [constructEdge(null, s)];
+  const { maxNumberOfTraversals, strategy } = settings;
+  const startingEdge = constructEdge(null, s);
   const results = {
     empty: [],
-    addSearchResult: (searchResults, edgesPaths, graphTraversalState, graph) => {
+    add: (searchResults, edgesPaths, graphTraversalState, graph) => {
       return searchResults.concat([edgesPaths.path])
     }
   }
   const search = {
     isGoalReached: (lastEdge, edgesPaths, graph, graphTraversalState) => {
-      const { getEdgeTarget } = graph;
+      const { getEdgeTarget,  getEdgeOrigin} = graph;
       const lastPathVertex = getEdgeTarget(lastEdge);
+      // Edge case : acounting for initial vertex
+      const vertexOrigin = getEdgeOrigin(lastEdge);
 
-      return lastPathVertex === t
+      return vertexOrigin  ? lastPathVertex === t : false
     },
     isTraversableEdge: (lastEdge, edgesPaths, graph, graphTraversalState) => {
-      // put here maximum number of traversal
-      return computeTimesCircledOn(edgesPaths.path, lastEdge) < (maxNumberOfTraversals || 1)
+      return computeTimesCircledOn(edgesPaths.path, lastEdge) <= (maxNumberOfTraversals || 1)
     },
   };
   const visit = {
     // NOTE : visit does not do much as the information we want in this search is already kept in `edgesPaths.path`
     initialEdgesPathState: {},
-    visitEdge: (edgesPathState, EdgePath, GraphTraversalState) => {
+    visitEdge: (edgesPathState, edges, graphTraversalState) => {
       return edgesPathState
     }
   };
   const traverse = { results, search, visit };
+  const traversalImpl = {
+    [BFS]: breadthFirstTraverseGraphEdges,
+    [DFS] : depthFirstTraverseGraphEdges
+  };
 
-  const allFoundPaths = breadthFirstTraverseGraphEdges(traverse, startingEdge, graph);
+  const allFoundPaths = traversalImpl[strategy || BFS](traverse, startingEdge, graph);
 
   return allFoundPaths
 }
-
-// store = [{[constructEdge(null, s)], edge path state = }]
-// while store is not empty
-//   pop one edge path and edge path state
-//   if !isTraversableEdge continue
-//   if isGoalReached
-//     update traversalState (reducer)
-//   if !isGoalReached
-//     foreach outgoing edges of target vertex(edge path)
-//       push the {edge path [edge, outgoing edge], updated edgePathState (reducer with edge)}
-//     end foreach
-// end while
-
-// be careful to compute isTraversableEdge only once, mmm might have to rather compute false || value instead of
-// Boolean not to compute twice. So rather call it traverseEdge returns false || something? I can use in the reducer?
-
 
 // isTraversableEdge is : - test_criteria pass && generator can generate
 // I need in settings :
@@ -321,50 +268,3 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
 // edge path state reducer will :
 // - add input generated by generator to input sequence
 // traversal state will have to hold the final input sequence generated, and the output sequence
-
-/**
- * @typedef {Object} Edge Edge must be an object (we use referential equality so this is to avoid surprises with
- * equality of native types)
- */
-/**
- * @typedef {Array<Edge>} EdgePath
- */
-/**
- * @typedef {Object} Vertex Vertices must be an object (we use referential equality so this is to avoid surprises with
- * equality of native types)
- */
-/**
- * @typedef {{allFoundPaths : Array<EdgePath>}} TraversalState
- */
-/**
- * @typedef {Object} EdgeADT
- * @property {function(Edge) : Vertex} getEdgeTarget
- * @property {function(Edge) : Vertex} getEdgeOrigin
- * @property {function(Vertex, Vertex) : Edge} constructEdge
- */
-/**
- * @typedef {Object} Graph
- * @property {function (Vertex) : Array<Edge>} outgoingEdges
- * @property {function (Vertex) : Array<Edge>} incomingEdges
- * @property {function (Vertex) : Array<Vertex>} getNeighbours
- * @property {function (Vertex) : Array<Vertex>} vertices
- * @property {function (Vertex) : Array<Vertex>} edges
- * @property {function (Vertex) : Array<Vertex>} settings
- * @property {function (Edge) : Vertex} getEdgeOrigin
- * @property {function (Edge) : Vertex} getEdgeTarget
- * @property {function(Vertex, Vertex) : Edge} constructEdge
- * @property {function (Vertex) : ()} showVertex
- * @property {function (Vertex) : ()} showEdge
- */
-/**
- * @typedef {Object} FindPathSettings
- * @property {Number} [maxNumberOfTraversals=1] a number greater or equal to 0. Set to 1 by default
- */
-/**
- * @typedef {Object} Store
- * @property {*} empty empty store or constructor for an empty store
- * @property {function (Array<>, Store) : ()} add adds values into a store
- * @property {function (Store) : *} takeAndRemoveOne empty store. removes one value from the store and returns that
- * value
- * @property {function (Store): Boolean} isEmpty predicate which returns true iff the store is empty
- */
