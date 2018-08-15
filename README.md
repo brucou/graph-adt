@@ -38,6 +38,8 @@ As such it is not and does not intend to be a all-purpose graph manipulation lib
  
  - enumeration of all edge paths between two vertices, with a configurable maximum for edge 
  repetition
+ - generic BFS and DFS graph **edge** search, which can be customized to implement some of the 
+ criteria presented thereabove
 
 This was chosen for pragmatic reasons. From this included algorithm, it is possible to implement 
 most of the above-mentioned coverage criteria.
@@ -46,15 +48,18 @@ most of the above-mentioned coverage criteria.
 ## Types
 ```javascript
 /**
- * @typedef {Object} Edge must be an object (we use referential equality so this is to avoid surprises with
+ * @typedef {Object} Edge Edge must be an object (we use referential equality so this is to avoid surprises with
  * equality of native types)
  */
 /**
  * @typedef {Array<Edge>} EdgePath
  */
 /**
- * @typedef {Object} Vertex must be an object (we use referential equality so this is to avoid surprises with
+ * @typedef {Object} Vertex Vertices must be an object (we use referential equality so this is to avoid surprises with
  * equality of native types)
+ */
+/**
+ * @typedef {{allFoundPaths : Array<EdgePath>}} TraversalState
  */
 /**
  * @typedef {Object} EdgeADT
@@ -69,7 +74,7 @@ most of the above-mentioned coverage criteria.
  * @property {function (Vertex) : Array<Vertex>} getNeighbours
  * @property {function (Vertex) : Array<Vertex>} vertices
  * @property {function (Vertex) : Array<Vertex>} edges
- * @property {function (Vertex) : Array<Vertex>} graphSettings
+ * @property {function (Vertex) : Array<Vertex>} settings
  * @property {function (Edge) : Vertex} getEdgeOrigin
  * @property {function (Edge) : Vertex} getEdgeTarget
  * @property {function(Vertex, Vertex) : Edge} constructEdge
@@ -79,6 +84,44 @@ most of the above-mentioned coverage criteria.
 /**
  * @typedef {Object} FindPathSettings
  * @property {Number} [maxNumberOfTraversals=1] a number greater or equal to 0. Set to 1 by default
+ * @property {String} [strategy='BFS'] search strategy : depth-first or breadth-first (default)
+ */
+/**
+ * @typedef {Object} Store
+ * @property {*} empty empty store or constructor for an empty store
+ * @property {function (Array<>, Store) : ()} add adds values into a store
+ * @property {function (Store) : *} takeAndRemoveOne empty store. removes one value from the store and returns that
+ * value
+ * @property {function (Store): Boolean} isEmpty predicate which returns true iff the store is empty
+ */
+
+/**
+ * @typedef {Map} GraphTraversalState `graphTraversalState` is shared state between search, result accumulation and
+ * visiting functions. As such it must be used carefully. Ideally it is not necessary. If it is necessary then only
+ * one function should modify it while the others read from it. That eliminates the need to think about order of
+ * function application.
+ */
+/**
+ * @typedef {Object} SearchSpecs
+ * @property {function (Edge, EdgesPaths, Graph, GraphTraversalState) : Boolean} isGoalReached predicate which
+ * assesses whether a sequence of edges realize the search goal, or if instead the search should continue
+ * @property {function (Edge, EdgesPaths, Graph, GraphTraversalState) : Boolean} isTraversableEdge predicate which
+ * examines whether a given edge should be traversed i.e. included in the search
+ */
+/**
+ * @typedef {{path : EdgePath, edgesPathState:*}} EdgesPaths
+ */
+/**
+ * @typedef {function (Result, EdgesPaths, GraphTraversalState, graph: Graph) : Result} ReducerResult
+ */
+/**
+ * @typedef {{initialEdgesPathState:*, visitEdge : ReducerEdge}} VisitSpecs
+ */
+/**
+ * @typedef {function (*, EdgePath, GraphTraversalState) : *} ReducerEdge
+ */
+/**
+ * @typedef {*} Result
  */
 ```
 
@@ -106,7 +149,7 @@ The array of vertices is mandatory, and must contain any and every vertex part o
  means in particular that no edge can be based on vertices which do not figure in the passed vertex 
  array. This is checked by contract, by means of referential equality.
 
-## findPathsBetweenVertices :: FindPathSettings -> Vertex -> Vertex -> Graph -> Array<EdgePath>
+## findPathsBetweenTwoVertices :: FindPathSettings -> Vertex -> Vertex -> Graph -> Array<EdgePath>
 Finds all paths between two vertices in a graph. Note that a path here is not an array of vertices
  but an array of edges. This is a requirement as we commonly deal in MBT with graphs with several
   guards between two states, with same-state transitions, and other circles.
@@ -116,14 +159,17 @@ are unique, i.e. there are no two same paths, with sameness defined by referenti
 the contained edges.
 
 It is possible to configure the maximum number of occurrences of a given edge in a path. Sameness
- is defined by referential equality. The default value is set to 1 (no repetition of a given edge - this ensures loop-free paths). Settings that parameter to a value greater than 1 allows to 
-  have some control over the traversal of the graph cycles.
+ is defined by referential equality. The default value is set to 1 (no repetition of a given edge - this ensures loop-free paths). Settings that parameter to a value greater than 1 allows to have some control over the traversal of the graph cycles.
 
 **Note that the first edge** in any returned path has a `null` vertex as origin vertex. Keep that
  in mind when using the returned paths : drop the first edge of the path.
 
 ## Algorithm
-We did not bother much with sophisticated algorithm. A collection of such can be found in the 
-directory. We use a recursive, brute-force enumeration algorithm, adapted for the need of 
-enumerate cycles and loops. 
+We did not bother much with a sophisticated algorithm. A collection of search algorithms can be 
+found in the assets directory of this repository. We used an iterative, brute-force enumeration 
+algorithm, adapted for the need of enumerate **edges**, accounting for loops, cycles, and 
+multi-edges. The algorithm can be found in 
+[Enumeration algorithm, p14](https://www.springer.com/cda/content/document/cda_downloaddocument/9789462390966-c2.pdf?SGWID=0-0-45-1499691-p177134948) 
 
+## Tests
+`npm run test`
