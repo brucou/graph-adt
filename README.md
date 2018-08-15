@@ -141,7 +141,7 @@ A complete description should be :
 -  `target :: e -> V`, assigning to each edge its target node.
 
 In order to keep the maximum generality, we are not imposing a concrete data structure for edges.
- This however means that the user must provide concrete realization for the edge abstraction data
+ This however means that the user must provide concrete realization for the edge abstract data
   type. This includes in particular the two lensing functions, which return the origin and target
    vertices for any given edge.
 
@@ -157,7 +157,7 @@ Finds all paths between two vertices in a graph. Note that a path here is not an
 If such paths exist, they are computed and returned in the form of array in which all elements 
 are unique, i.e. there are no two same paths, with sameness defined by referential equality of 
 the contained edges.
-
+ 
 It is possible to configure the maximum number of occurrences of a given edge in a path. Sameness
  is defined by referential equality. The default value is set to 1 (no repetition of a given edge - this ensures loop-free paths). Settings that parameter to a value greater than 1 allows to have some control over the traversal of the graph cycles.
 
