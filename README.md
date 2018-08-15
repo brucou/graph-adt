@@ -153,7 +153,7 @@ The array of vertices is mandatory, and must contain any and every vertex part o
 Finds all paths between two vertices in a graph. Note that a path here is not an array of vertices
  but an array of edges. This is a requirement as we commonly deal in MBT with graphs with several
   guards between two states, with same-state transitions, and other circles.
-  
+
 If such paths exist, they are computed and returned in the form of array in which all elements 
 are unique, i.e. there are no two same paths, with sameness defined by referential equality of 
 the contained edges.
