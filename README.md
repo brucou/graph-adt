@@ -161,8 +161,10 @@ the contained edges.
 It is possible to configure the maximum number of occurrences of a given edge in a path. Sameness
  is defined by referential equality. The default value is set to 1 (no repetition of a given edge - this ensures loop-free paths). Settings that parameter to a value greater than 1 allows to have some control over the traversal of the graph cycles.
 
-**Note that the first edge** in any returned path has a `null` vertex as origin vertex. Keep that
- in mind when using the returned paths : drop the first edge of the path.
+**Note that because the search starts with a vertex and not an edge**, it is necessary to pass a 
+'fake' starting edge whose origin is a `null` vertex, and target is the starting vertex. As a 
+result, in any returned path the first edge will feature a `null` origin vertex. Keep that in 
+mind when using the returned paths : drop the first edge of the path.
 
 ## Algorithm
 We did not bother much with a sophisticated algorithm. A collection of search algorithms can be 
