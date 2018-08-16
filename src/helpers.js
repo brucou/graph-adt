@@ -52,20 +52,6 @@ export function computeTimesCircledOn(edgePath, edge) {
   return edgePath.reduce((acc, edgeInEdgePath) => edgeInEdgePath === edge ? acc + 1 : acc, 0);
 }
 
-export function shouldEdgeBeTraversedYetAgain(settings, graph, t, edgePath, edge) {
-  const {maxNumberOfTraversals } = settings;
-  return (
-    !isEdgeInEdgePath(edgePath, edge) ||
-    computeTimesCircledOn(edgePath, edge) < (maxNumberOfTraversals || 1)
-  )
-}
-
-export function isTargetEdgeReached(settings, graph, edgePath, t, edge){
-  const {getEdgeTarget} = graph;
-
-  return isVertexEqual(getEdgeTarget(edge), t)
-}
-
 export const queueStore = {
   empty: [],
   takeAndRemoveOne: store => ({popped : store[0], newStore: store.slice(1)}),

@@ -1,8 +1,4 @@
-import {
-  BFS,
-  computeTimesCircledOn, DFS, getLastVertexInPath, isFunction, isTargetEdgeReached, merge, print, queueStore,
-  shouldEdgeBeTraversedYetAgain, stackStore
-} from "./helpers"
+import { BFS, computeTimesCircledOn, DFS, isFunction, print, queueStore, stackStore } from "./helpers"
 
 export * from './types'
 export * from './properties'
@@ -112,10 +108,10 @@ function traverseNext(searchResults, store, graphTraversalState, traversalSpecs,
   const lastEdge = edges[edges.length - 1];
   edgesPaths.edgesPathState = visitEdge(edgesPathState, edges, graphTraversalState);
 
-  if (!isTraversableEdge(lastEdge, edgesPaths, graph, graphTraversalState)) return { searchResults, store : newStore };
+  if (!isTraversableEdge(lastEdge, edgesPaths, graph, graphTraversalState)) return { searchResults, store: newStore };
   if (isGoalReached(lastEdge, edgesPaths, graph, graphTraversalState)) {
     const newSearchResults = addSearchResult(searchResults, edgesPaths, graphTraversalState, graph);
-    return { searchResults: newSearchResults, store:newStore }
+    return { searchResults: newSearchResults, store: newStore }
   }
   else {
     const lastVertexOnEdgePath = getEdgeTarget(lastEdge);
@@ -171,12 +167,12 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   }
   const search = {
     isGoalReached: (lastEdge, edgesPaths, graph, graphTraversalState) => {
-      const { getEdgeTarget,  getEdgeOrigin} = graph;
+      const { getEdgeTarget, getEdgeOrigin } = graph;
       const lastPathVertex = getEdgeTarget(lastEdge);
       // Edge case : acounting for initial vertex
       const vertexOrigin = getEdgeOrigin(lastEdge);
 
-      return vertexOrigin  ? lastPathVertex === t : false
+      return vertexOrigin ? lastPathVertex === t : false
     },
     isTraversableEdge: (lastEdge, edgesPaths, graph, graphTraversalState) => {
       return computeTimesCircledOn(edgesPaths.path, lastEdge) <= (maxNumberOfTraversals || 1)
@@ -192,7 +188,7 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   const traverse = { results, search, visit };
   const traversalImpl = {
     [BFS]: breadthFirstTraverseGraphEdges,
-    [DFS] : depthFirstTraverseGraphEdges
+    [DFS]: depthFirstTraverseGraphEdges
   };
 
   const allFoundPaths = traversalImpl[strategy || BFS](traverse, startingEdge, graph);

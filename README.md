@@ -175,3 +175,10 @@ multi-edges. The algorithm can be found in
 
 ## Tests
 `npm run test`
+
+# Tips and gotchas
+- edges which are not reachable from the starting edge won't be reached. That sounds obvious but 
+it is easy to forget.
+- the `GraphTraversalState` can be used to implement early termination of the search. Typically 
+`visit` would update some flag in the graph traversal state, and `isTraversableEdge` would not 
+produce any further edges after consulting that flag.
