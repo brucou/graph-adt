@@ -68,7 +68,7 @@
  * @typedef {{initialPathTraversalState:*, visitEdge : ReducerEdge}} VisitSpecs
  */
 /**
- * @typedef {function (PathTraversalState, Edge, GraphTraversalState) : *} ReducerEdge
+ * @typedef {function (Edge, PathTraversalState, GraphTraversalState) : *} ReducerEdge
  */
 /**
  * @typedef {*} Result

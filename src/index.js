@@ -104,7 +104,7 @@ function traverseNext(searchResults, store, graphTraversalState, traversalSpecs,
   // TODO :  write VisitEdge the last edge (even when given the whole array)
   const { popped: edgeAndPaths, newStore } = takeAndRemoveOne(store);
   const { edge, pathTraversalState } = edgeAndPaths;
-  const newPathTraversalState = visitEdge(pathTraversalState, edge, graphTraversalState);
+  const newPathTraversalState = visitEdge(edge, pathTraversalState, graphTraversalState);
 
   if (!isTraversableEdge(edge, graph, newPathTraversalState, graphTraversalState)) {
     return { searchResults, store: newStore }
@@ -178,9 +178,8 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   const visit = {
     // NOTE : visit does not do much as the information we want in this search is already kept in `edgesPaths.path`
     initialPathTraversalState: {path : []},
-    visitEdge: (pathTraversalState, edge, graphTraversalState) => {
-      debugger
-      return { path: pathTraversalState.path.concat(edge) }
+    visitEdge: (edge, pathTraversalState, graphTraversalState) => {
+      return { path: pathTraversalState.path.concat([edge]) }
     }
   };
   const traverse = { results, search, visit };

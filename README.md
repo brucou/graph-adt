@@ -101,12 +101,14 @@ most of the above-mentioned coverage criteria.
 /**
  * @typedef {Object} SearchSpecs
  * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : Boolean} isGoalReached predicate which
- * assesses whether a sequence of edges realize the search goal, or if instead the search should continue
+ * assesses whether a given goal is reached, or if instead the search should continue. To assess the goal, the
+ * provided information is the edge being visited, and the current edge traversal state (roughly the sequence of
+ * edges visited so far).
  * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : Boolean} isTraversableEdge predicate which
  * examines whether a given edge should be traversed i.e. included in the search
  */
 /**
- * @typedef {{path : EdgePath, edgesPathState:*}} PathTraversalState
+ * @typedef {*} PathTraversalState
  */
 /**
  * @typedef {function (Result, Graph, PathTraversalState, GraphTraversalState ) : Result} ReducerResult
@@ -115,7 +117,7 @@ most of the above-mentioned coverage criteria.
  * @typedef {{initialPathTraversalState:*, visitEdge : ReducerEdge}} VisitSpecs
  */
 /**
- * @typedef {function (PathTraversalState, Edge, GraphTraversalState) : *} ReducerEdge
+ * @typedef {function (Edge, PathTraversalState, GraphTraversalState) : *} ReducerEdge
  */
 /**
  * @typedef {*} Result
