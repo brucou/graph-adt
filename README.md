@@ -59,9 +59,6 @@ most of the above-mentioned coverage criteria.
  * equality of native types)
  */
 /**
- * @typedef {{allFoundPaths : Array<EdgePath>}} TraversalState
- */
-/**
  * @typedef {Object} EdgeADT
  * @property {function(Edge) : Vertex} getEdgeTarget
  * @property {function(Edge) : Vertex} getEdgeOrigin
@@ -103,22 +100,22 @@ most of the above-mentioned coverage criteria.
  */
 /**
  * @typedef {Object} SearchSpecs
- * @property {function (Edge, EdgesPaths, Graph, GraphTraversalState) : Boolean} isGoalReached predicate which
+ * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : Boolean} isGoalReached predicate which
  * assesses whether a sequence of edges realize the search goal, or if instead the search should continue
- * @property {function (Edge, EdgesPaths, Graph, GraphTraversalState) : Boolean} isTraversableEdge predicate which
+ * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : Boolean} isTraversableEdge predicate which
  * examines whether a given edge should be traversed i.e. included in the search
  */
 /**
- * @typedef {{path : EdgePath, edgesPathState:*}} EdgesPaths
+ * @typedef {{path : EdgePath, edgesPathState:*}} PathTraversalState
  */
 /**
- * @typedef {function (Result, EdgesPaths, GraphTraversalState, graph: Graph) : Result} ReducerResult
+ * @typedef {function (Result, Graph, PathTraversalState, GraphTraversalState ) : Result} ReducerResult
  */
 /**
- * @typedef {{initialEdgesPathState:*, visitEdge : ReducerEdge}} VisitSpecs
+ * @typedef {{initialPathTraversalState:*, visitEdge : ReducerEdge}} VisitSpecs
  */
 /**
- * @typedef {function (*, EdgePath, GraphTraversalState) : *} ReducerEdge
+ * @typedef {function (PathTraversalState, Edge, GraphTraversalState) : *} ReducerEdge
  */
 /**
  * @typedef {*} Result

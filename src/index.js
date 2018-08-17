@@ -67,17 +67,16 @@ export function searchGraphEdges(traversalSpecs, startingEdge, graph) {
   const { empty: storeConstructor, add, isEmpty } = store;
   const { results, visit } = traverse;
   const { empty: resultConstructor } = results;
-  const { initialEdgesPathState } = visit;
+  const { initialPathTraversalState } = visit;
 
   const graphTraversalState = new Map();
   // NOTE : having a constructor allows to build non-JSON objects.
   const emptySearchResults = isFunction(resultConstructor) ? new (resultConstructor()) : resultConstructor;
   const emptyStore = isFunction(storeConstructor) ? new (storeConstructor()) : storeConstructor;
-  const initialEdgePaths = { path: [startingEdge], edgesPathState: initialEdgesPathState };
-
+  const initialStoreValue = {edge : startingEdge, pathTraversalState : initialPathTraversalState}
   let searchResults = emptySearchResults;
-  let currentStore = add([initialEdgePaths], emptyStore);
-
+  let currentStore = add([initialStoreValue], emptyStore);
+debugger
   while ( !isEmpty(currentStore) ) {
     const {
       searchResults: newSearchResults,
@@ -103,25 +102,23 @@ function traverseNext(searchResults, store, graphTraversalState, traversalSpecs,
   const { outgoingEdges: getOutgoingEdges, getEdgeTarget } = graph;
 
   // TODO :  write VisitEdge the last edge (even when given the whole array)
-  const { popped: edgesPaths, newStore } = takeAndRemoveOne(store);
-  const { path: edges, edgesPathState } = edgesPaths;
-  const lastEdge = edges[edges.length - 1];
-  edgesPaths.edgesPathState = visitEdge(edgesPathState, edges, graphTraversalState);
+  const { popped: edgeAndPaths, newStore } = takeAndRemoveOne(store);
+  const { edge, pathTraversalState } = edgeAndPaths;
+  const newPathTraversalState = visitEdge(pathTraversalState, edge, graphTraversalState);
 
-  if (!isTraversableEdge(lastEdge, edgesPaths, graph, graphTraversalState)) return { searchResults, store: newStore };
-  if (isGoalReached(lastEdge, edgesPaths, graph, graphTraversalState)) {
-    const newSearchResults = addSearchResult(searchResults, edgesPaths, graphTraversalState, graph);
+  if (!isTraversableEdge(edge, graph, newPathTraversalState, graphTraversalState)) {
+    return { searchResults, store: newStore }
+  }
+  if (isGoalReached(edge, graph, newPathTraversalState, graphTraversalState)) {
+    const newSearchResults = addSearchResult(searchResults, graph, newPathTraversalState, graphTraversalState);
+
     return { searchResults: newSearchResults, store: newStore }
   }
   else {
-    const lastVertexOnEdgePath = getEdgeTarget(lastEdge);
+    const lastVertexOnEdgePath = getEdgeTarget(edge);
     const outgoingEdges = getOutgoingEdges(lastVertexOnEdgePath);
-    const newEdgesPaths = outgoingEdges.map(edge => {
-      return {
-        path: edges.concat([edge]),
-        edgesPathState
-      }
-    });
+    const newEdgesPaths = outgoingEdges.map(edge => ({ edge: edge, pathTraversalState : newPathTraversalState }));
+
     return { searchResults, store: add(newEdgesPaths, newStore) };
   }
 }
@@ -161,28 +158,29 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   const startingEdge = constructEdge(null, s);
   const results = {
     empty: [],
-    add: (searchResults, edgesPaths, graphTraversalState, graph) => {
-      return searchResults.concat([edgesPaths.path])
+    add: (searchResults, graph, pathTraversalState, graphTraversalState) => {
+      return searchResults.concat([pathTraversalState.path])
     }
   }
   const search = {
-    isGoalReached: (lastEdge, edgesPaths, graph, graphTraversalState) => {
+    isGoalReached: (edge, graph, pathTraversalState, graphTraversalState) => {
       const { getEdgeTarget, getEdgeOrigin } = graph;
-      const lastPathVertex = getEdgeTarget(lastEdge);
+      const lastPathVertex = getEdgeTarget(edge);
       // Edge case : acounting for initial vertex
-      const vertexOrigin = getEdgeOrigin(lastEdge);
+      const vertexOrigin = getEdgeOrigin(edge);
 
       return vertexOrigin ? lastPathVertex === t : false
     },
-    isTraversableEdge: (lastEdge, edgesPaths, graph, graphTraversalState) => {
-      return computeTimesCircledOn(edgesPaths.path, lastEdge) <= (maxNumberOfTraversals || 1)
+    isTraversableEdge: (edge, graph, pathTraversalState, graphTraversalState) => {
+      return computeTimesCircledOn(pathTraversalState.path, edge) <= (maxNumberOfTraversals || 1)
     },
   };
   const visit = {
     // NOTE : visit does not do much as the information we want in this search is already kept in `edgesPaths.path`
-    initialEdgesPathState: {},
-    visitEdge: (edgesPathState, edges, graphTraversalState) => {
-      return edgesPathState
+    initialPathTraversalState: {path : []},
+    visitEdge: (pathTraversalState, edge, graphTraversalState) => {
+      debugger
+      return { path: pathTraversalState.path.concat(edge) }
     }
   };
   const traverse = { results, search, visit };
