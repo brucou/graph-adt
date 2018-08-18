@@ -51,12 +51,8 @@
  */
 /**
  * @typedef {Object} SearchSpecs
- * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : Boolean} isGoalReached predicate which
- * assesses whether a given goal is reached, or if instead the search should continue. To assess the goal, the
- * provided information is the edge being visited, and the current edge traversal state (roughly the sequence of
- * edges visited so far).
- * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : Boolean} isTraversableEdge predicate which
- * examines whether a given edge should be traversed i.e. included in the search
+ * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : {graphTraversalState : GraphTraversalState, isGoalReached : Boolean} } evaluateGoal predicate which assesses whether a given goal is reached, or if instead the search should continue. To assess the goal, the provided information is the edge being visited, and the current edge traversal state (roughly the sequence of edges visited so far).
+ * @property {*} initialGoalEvalState seed for the reducer associated to goal evaluation
  */
 /**
  * @typedef {*} PathTraversalState
@@ -68,7 +64,9 @@
  * @typedef {{initialPathTraversalState:*, visitEdge : ReducerEdge}} VisitSpecs
  */
 /**
- * @typedef {function (Edge, PathTraversalState, GraphTraversalState) : *} ReducerEdge
+ * @typedef {function (Edge, Graph, PathTraversalState, GraphTraversalState) : {isTraversableEdge :Boolean,  pathTraversalState:PathTraversalState}} ReducerEdge
+ * function which visit the edge, updates the state of the edge traversal, and evaluates if the visited edge
+ * should be included in the search (`isTraversableEdge` set to true) or not.
  */
 /**
  * @typedef {*} Result

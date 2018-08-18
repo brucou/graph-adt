@@ -67,5 +67,9 @@ export const stackStore = {
   add: (subTrees, store) => subTrees.concat(store)
 };
 
+export function initializeState(obj){
+  return isFunction(obj) ? new (obj()) : obj;
+}
+
 export const BFS = 'BFS'
 export const DFS = 'DFS'
