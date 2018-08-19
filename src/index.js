@@ -56,90 +56,88 @@ export function constructGraph(settings, edges, vertices) {
  * Starting from an initial edge, (brute-force) iteratively search the graph traversing edges which fulfill some
  * conditions (`isTraversableEdge`), till a goal is reached (`isGoalReached`).
  * Search results are accumulated via a provided reducer function (`addSearchResult`).
- * @param {{store: Store, traverse: {results : ReducerResult, search: SearchSpecs, visit : VisitSpecs}}} traversalSpecs
+ * @param {{store: Store, search: SearchSpecs, visit : VisitSpecs}} traversalSpecs
  * @param {Edge} startingEdge
  * @param {Graph} graph
  * @returns {*} the accumulated result of the searches
  */
 export function searchGraphEdges(traversalSpecs, startingEdge, graph) {
-  const { store, traverse } = traversalSpecs;
+  const { store, visit, search } = traversalSpecs;
   const { empty: storeConstructor, add, isEmpty } = store;
-  const { results, visit, search } = traverse;
-  const { empty: resultConstructor } = results;
   const { initialPathTraversalState } = visit;
-  const { initialGoalEvalState } = search;
+  const { initialGoalEvalState, showResults } = search;
+  let searchResults;
 
   // NOTE : having a constructor allows to build non-JSON objects.
-  const graphTraversalState = initializeState(initialGoalEvalState);
-  const emptySearchResults = initializeState(resultConstructor);
+  let graphTraversalState = initializeState(initialGoalEvalState);
   const emptyStore = initializeState(storeConstructor);
   const initialStoreValue = { edge: startingEdge, pathTraversalState: initializeState(initialPathTraversalState) };
-  let searchResults = emptySearchResults;
   let currentStore = add([initialStoreValue], emptyStore);
-  debugger
+
   while ( !isEmpty(currentStore) ) {
     const {
-      searchResults: newSearchResults,
+      graphTraversalState: newGraphTraversalState,
       store: newStore
-    } = traverseNext(searchResults, currentStore, traversalSpecs, graph, graphTraversalState);
-    searchResults = newSearchResults;
+    } = traverseNext(currentStore, traversalSpecs, graph, graphTraversalState);
     currentStore = newStore;
+    graphTraversalState = newGraphTraversalState;
   }
 
   // NOTE : We do not have the possibility to clear ressources for the state we have created for each reducer
   // function to manipulate. If possible, to avoid memory leaks, use `WeakMap` instead of `Map`, etc.
-  return searchResults;
+  return showResults(graphTraversalState)
 }
 
-function traverseNext(searchResults, store, traversalSpecs, graph, graphTraversalState) {
-  const { store: storeSpecs, traverse } = traversalSpecs;
+function traverseNext(store, traversalSpecs, graph, graphTraversalState) {
+  const { store: storeSpecs, search, visit } = traversalSpecs;
   const { add, takeAndRemoveOne } = storeSpecs;
-  const { results: resultsReducerSpecs, search, visit } = traverse;
   const { visitEdge } = visit;
-  const { add: addSearchResult } = resultsReducerSpecs;
-  const { initialEvaluation, evaluateGoal } = search;
+  const { evaluateGoal } = search;
   const { outgoingEdges: getOutgoingEdges, getEdgeTarget } = graph;
 
   // TODO :  write VisitEdge the last edge (even when given the whole array)
   const { popped: edgeAndPaths, newStore } = takeAndRemoveOne(store);
   const { edge, pathTraversalState } = edgeAndPaths;
   const {
-    pathTraversalState  : newPathTraversalState,
+    pathTraversalState: newPathTraversalState,
     isTraversableEdge
   } = visitEdge(edge, graph, pathTraversalState, graphTraversalState);
 
   if (!isTraversableEdge) {
-    return { searchResults, store: newStore }
+    return { graphTraversalState, store: newStore }
   }
 
-  const { isGoalReached, graphTraversalState: newGraphTraversalState } = evaluateGoal(edge, graph, newPathTraversalState, graphTraversalState);
+  const {
+    isGoalReached,
+    graphTraversalState: newGraphTraversalState,
+  } = evaluateGoal(edge, graph, newPathTraversalState, graphTraversalState);
   if (isGoalReached) {
-    const newSearchResults = addSearchResult(searchResults, graph, newPathTraversalState, newGraphTraversalState);
-
-    return { searchResults: newSearchResults, store: newStore }
+    return { graphTraversalState: newGraphTraversalState, store: newStore }
   }
   else {
     const lastVertexOnEdgePath = getEdgeTarget(edge);
     const outgoingEdges = getOutgoingEdges(lastVertexOnEdgePath);
     const newEdgesPaths = outgoingEdges.map(edge => ({ edge: edge, pathTraversalState: newPathTraversalState }));
 
-    return { searchResults, store: add(newEdgesPaths, newStore) };
+    return { graphTraversalState: newGraphTraversalState, store: add(newEdgesPaths, newStore) };
   }
 }
 
-export function breadthFirstTraverseGraphEdges(traverse, startingEdge, graph) {
+export function breadthFirstTraverseGraphEdges(search, visit, startingEdge, graph) {
   const traversalSpecs = {
     store: queueStore,
-    traverse
+    search,
+    visit
   };
 
   return searchGraphEdges(traversalSpecs, startingEdge, graph);
 }
 
-export function depthFirstTraverseGraphEdges(traverse, startingEdge, graph) {
+export function depthFirstTraverseGraphEdges(search, visit, startingEdge, graph) {
   const traversalSpecs = {
     store: stackStore,
-    traverse
+    search,
+    visit
   };
 
   return searchGraphEdges(traversalSpecs, startingEdge, graph);
@@ -160,23 +158,26 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   const { constructEdge } = graph;
   const { maxNumberOfTraversals, strategy } = settings;
   const startingEdge = constructEdge(null, s);
-  const results = {
-    empty: [],
-    add: (searchResults, graph, pathTraversalState, graphTraversalState) => {
-      return searchResults.concat([pathTraversalState.path])
-    }
-  };
   const search = {
-    initialGoalEvalState : {},
-    evaluateGoal : (edge, graph, pathTraversalState, graphTraversalState) => {
+    initialGoalEvalState: { results: [], path : [] },
+    showResults : graphTraversalState => graphTraversalState.results,
+    evaluateGoal: (edge, graph, pathTraversalState, graphTraversalState) => {
+      const { results } = graphTraversalState;
       const { getEdgeTarget, getEdgeOrigin } = graph;
       const lastPathVertex = getEdgeTarget(edge);
       // Edge case : accounting for initial vertex
       const vertexOrigin = getEdgeOrigin(edge);
 
+      const isGoalReached = vertexOrigin ? lastPathVertex === t : false;
+      debugger
+      const newResults = isGoalReached
+        ? results.concat([pathTraversalState.path])
+        : results;
+      const newGraphTraversalState = { results: newResults };
+
       return {
-        isGoalReached: vertexOrigin ? lastPathVertex === t : false,
-        graphTraversalState
+        isGoalReached,
+        graphTraversalState: newGraphTraversalState
       }
     },
   };
@@ -185,18 +186,17 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
     initialPathTraversalState: { path: [] },
     visitEdge: (edge, graph, pathTraversalState, graphTraversalState) => {
       return {
-        pathTraversalState : {path: pathTraversalState.path.concat([edge])},
-        isTraversableEdge : computeTimesCircledOn(pathTraversalState.path, edge) < (maxNumberOfTraversals || 1)
+        pathTraversalState: { path: pathTraversalState.path.concat([edge]) },
+        isTraversableEdge: computeTimesCircledOn(pathTraversalState.path, edge) < (maxNumberOfTraversals || 1)
       }
     }
   };
-  const traverse = { results, search, visit };
   const traversalImpl = {
     [BFS]: breadthFirstTraverseGraphEdges,
     [DFS]: depthFirstTraverseGraphEdges
   };
 
-  const allFoundPaths = traversalImpl[strategy || BFS](traverse, startingEdge, graph);
+  const allFoundPaths = traversalImpl[strategy || BFS](search, visit, startingEdge, graph);
 
   return allFoundPaths
 }

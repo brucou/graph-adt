@@ -51,14 +51,13 @@
  */
 /**
  * @typedef {Object} SearchSpecs
- * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : {graphTraversalState : GraphTraversalState, isGoalReached : Boolean} } evaluateGoal predicate which assesses whether a given goal is reached, or if instead the search should continue. To assess the goal, the provided information is the edge being visited, and the current edge traversal state (roughly the sequence of edges visited so far).
+ * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : {graphTraversalState : GraphTraversalState, isGoalReached : Boolean} } evaluateGoal predicate which assesses whether a given goal is reached, or if instead the search should continue. To assess the goal, the provided information is the edge being visited, and the current edge traversal state (roughly the sequence of edges visited so far). If the goal is reached, this means we have some results for the search, and those results are aggregated somewhere in the graph traversal state for posterior extraction through `showResults`.
  * @property {*} initialGoalEvalState seed for the reducer associated to goal evaluation
+ * @property {function (GraphTraversalState) : Search<Result>} showResults returns the accumulated results which
+ * have been stored in the graph traversal state
  */
 /**
  * @typedef {*} PathTraversalState
- */
-/**
- * @typedef {function (Result, Graph, PathTraversalState, GraphTraversalState ) : Result} ReducerResult
  */
 /**
  * @typedef {{initialPathTraversalState:*, visitEdge : ReducerEdge}} VisitSpecs
@@ -70,4 +69,7 @@
  */
 /**
  * @typedef {*} Result
+ */
+/**
+ * @typedef {*<*>} Search serves to aggregate results into a result container
  */
