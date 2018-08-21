@@ -139,8 +139,22 @@ A complete description should be :
 
 In order to keep the maximum generality, we are not imposing a concrete data structure for edges.
  This however means that the user must provide concrete realization for the edge abstract data
-  type. This includes in particular the two lensing functions, which return the origin and target
-   vertices for any given edge.
+  type. This includes in particular :
+  
+  - the two lensing functions `getEdgeOrigin` and `getEdgeTarget`, which return the origin and 
+  target vertices for any given edge
+  - a constructing function `constructEdge :: Vertex -> Vertex -> * -> Edge`, which returns an 
+  edge from the origin vertex, target vertex, and any other extra information necessary to build 
+  the edge
+
+The following laws must apply :
+
+- for all `extra` values, `getEdgeOrigin(constructEdge(origin, target, extra)) == origin`
+- for all `extra` values, `getEdgeTarget(constructEdge(origin, target, extra)) == target`
+
+Note that the traversal algorithm so far make no use of the extra parameters, as we only do 
+path enumeration, and not for example shortest paths (where a weight extra parameter would be 
+necessary).
 
 The array of vertices is mandatory, and must contain any and every vertex part of the graph. This
  means in particular that no edge can be based on vertices which do not figure in the passed vertex 
