@@ -28,6 +28,7 @@
  * @property {function(Vertex, Vertex) : Edge} constructEdge
  * @property {function (Vertex) : ()} showVertex
  * @property {function (Vertex) : ()} showEdge
+ * @property {function () : ()} clear free any resources that was used
  */
 /**
  * @typedef {Object} FindPathSettings

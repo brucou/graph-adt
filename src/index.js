@@ -16,10 +16,11 @@ export * from './types'
  */
 export function constructGraph(settings, edges, vertices) {
   const { getEdgeTarget, getEdgeOrigin, constructEdge } = settings;
-  const vertexMap = new WeakMap();
+  // NOTE: we need a map, because weak map does not accept string, and for our use cases, we need to use string vertices
+  const vertexMap = new Map();
   const edgeMap = new WeakMap();
-  const outgoingEdges = new WeakMap();
-  const incomingEdges = new WeakMap();
+  const outgoingEdges = new Map();
+  const incomingEdges = new Map();
 
   // NOTE : we associated a numerical index to each vertex and edge.
   // This will be used for labelling or displaying purposes
@@ -48,7 +49,8 @@ export function constructGraph(settings, edges, vertices) {
     edges,
     getEdgeTarget,
     getEdgeOrigin,
-    constructEdge
+    constructEdge,
+    clear : () => {vertexMap.clear(); outgoingEdges.clear(); incomingEdges.clear()}
   }
 }
 
@@ -169,7 +171,7 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
       const vertexOrigin = getEdgeOrigin(edge);
 
       const isGoalReached = vertexOrigin ? lastPathVertex === t : false;
-      debugger
+
       const newResults = isGoalReached
         ? results.concat([pathTraversalState.path])
         : results;
