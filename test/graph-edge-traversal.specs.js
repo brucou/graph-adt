@@ -37,12 +37,6 @@ QUnit.test("paths(s,s) : Ignores self-loops on target vertex", function exec_tes
   assert.deepEqual(findPathsBetweenTwoVertices(findPathSettings, graph, vertex1, vertex1), [
     [
       {
-        "origin": null,
-        "target": {
-          "v": "v"
-        }
-      },
-      {
         "origin": {
           "v": "v"
         },
@@ -71,12 +65,6 @@ QUnit.test("paths(s, s) : Multi-self-loops are correctly enumerated when the tar
     [
       [
         {
-          "origin": null,
-          "target": {
-            "w": "w"
-          }
-        },
-        {
           "origin": {
             "w": "w"
           },
@@ -86,12 +74,6 @@ QUnit.test("paths(s, s) : Multi-self-loops are correctly enumerated when the tar
         }
       ],
       [
-        {
-          "origin": null,
-          "target": {
-            "w": "w"
-          }
-        },
         {
           "origin": {
             "w": "w"
@@ -120,12 +102,6 @@ QUnit.test("paths(s, t) : self-loops on target vertex are ignored and paths are 
   assert.deepEqual(findPathsBetweenTwoVertices(findPathSettings, graph, vertex1, vertex2), [
     [
       {
-        "origin": null,
-        "target": {
-          "v": "v"
-        }
-      },
-      {
         "origin": {
           "v": "v"
         },
@@ -135,12 +111,6 @@ QUnit.test("paths(s, t) : self-loops on target vertex are ignored and paths are 
       }
     ],
     [
-      {
-        "origin": null,
-        "target": {
-          "v": "v"
-        }
-      },
       {
         "origin": {
           "v": "v"
@@ -159,12 +129,6 @@ QUnit.test("paths(s, t) : self-loops on target vertex are ignored and paths are 
       }
     ],
     [
-      {
-        "origin": null,
-        "target": {
-          "v": "v"
-        }
-      },
       {
         "origin": {
           "v": "v"
@@ -218,56 +182,47 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
 
   assert.deepEqual(foundIdPaths, [
     [
-      6,
       1
     ],
     [
-      6,
       2,
       5
     ],
     [
-      6,
       2,
       3,
       5
     ],
     [
-      6,
       2,
       4,
       5
     ],
     [
-      6,
       2,
       3,
       3,
       5
     ],
     [
-      6,
       2,
       3,
       4,
       5
     ],
     [
-      6,
       2,
       4,
       3,
       5
     ],
     [
-      6,
       2,
       4,
       4,
       5
     ],
     [
-      6,
       2,
       3,
       3,
@@ -275,7 +230,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       3,
       4,
@@ -283,7 +237,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       3,
       4,
@@ -291,7 +244,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       4,
       3,
@@ -299,7 +251,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       4,
       3,
@@ -307,7 +258,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       4,
       4,
@@ -315,7 +265,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       3,
       3,
@@ -324,7 +273,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       3,
       4,
@@ -333,7 +281,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       3,
       4,
@@ -342,7 +289,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       4,
       3,
@@ -351,7 +297,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       4,
       3,
@@ -360,7 +305,6 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
       5
     ],
     [
-      6,
       2,
       4,
       4,
@@ -406,12 +350,6 @@ QUnit.test("paths(s,s) : Ignores self-loops on target vertex", function exec_tes
   assert.deepEqual(findPathsBetweenTwoVertices(findPathSettings, graph, vertex1, vertex1), [
     [
       {
-        "origin": null,
-        "target": {
-          "v": "v"
-        }
-      },
-      {
         "origin": {
           "v": "v"
         },
@@ -440,12 +378,6 @@ QUnit.test("paths(s, s) : Multi-self-loops are correctly enumerated when the tar
     [
       [
         {
-          "origin": null,
-          "target": {
-            "w": "w"
-          }
-        },
-        {
           "origin": {
             "w": "w"
           },
@@ -455,12 +387,6 @@ QUnit.test("paths(s, s) : Multi-self-loops are correctly enumerated when the tar
         }
       ],
       [
-        {
-          "origin": null,
-          "target": {
-            "w": "w"
-          }
-        },
         {
           "origin": {
             "w": "w"
@@ -488,19 +414,58 @@ QUnit.test("paths(s, t) : self-loops on target vertex are ignored and paths are 
 
   assert.deepEqual(findPathsBetweenTwoVertices(findPathSettings, graph, vertex1, vertex2), [
     [
-      { "origin": null, "target": { "v": "v" } },
-      { "origin": { "v": "v" }, "target": { "v": "v" } },
-      { "origin": { "v": "v" }, "target": { "v": "v" } },
-      { "origin": { "v": "v" }, "target": { "w": "w" } }
+      {
+        "origin": {
+          "v": "v"
+        },
+        "target": {
+          "v": "v"
+        }
+      },
+      {
+        "origin": {
+          "v": "v"
+        },
+        "target": {
+          "v": "v"
+        }
+      },
+      {
+        "origin": {
+          "v": "v"
+        },
+        "target": {
+          "w": "w"
+        }
+      }
     ],
     [
-      { "origin": null, "target": { "v": "v" } },
-      { "origin": { "v": "v" }, "target": { "v": "v" } },
-      { "origin": { "v": "v" }, "target": { "w": "w" } }
+      {
+        "origin": {
+          "v": "v"
+        },
+        "target": {
+          "v": "v"
+        }
+      },
+      {
+        "origin": {
+          "v": "v"
+        },
+        "target": {
+          "w": "w"
+        }
+      }
     ],
     [
-      { "origin": null, "target": { "v": "v" } },
-      { "origin": { "v": "v" }, "target": { "w": "w" } }
+      {
+        "origin": {
+          "v": "v"
+        },
+        "target": {
+          "w": "w"
+        }
+      }
     ]
   ], `...`);
 });
@@ -529,26 +494,137 @@ QUnit.test("paths(s, t) : loops with maxNumberOfCircleTraversal are correctly en
   const foundIdPaths = foundPaths.map(path => path.map(x => x.id));
 
   assert.deepEqual(foundIdPaths, [
-    [6, 1],
-    [6, 2, 3, 3, 4, 4, 5],
-    [6, 2, 3, 3, 4, 5],
-    [6, 2, 3, 3, 5],
-    [6, 2, 3, 4, 3, 4, 5],
-    [6, 2, 3, 4, 3, 5],
-    [6, 2, 3, 4, 4, 3, 5],
-    [6, 2, 3, 4, 4, 5],
-    [6, 2, 3, 4, 5],
-    [6, 2, 3, 5],
-    [6, 2, 4, 3, 3, 4, 5],
-    [6, 2, 4, 3, 3, 5],
-    [6, 2, 4, 3, 4, 3, 5],
-    [6, 2, 4, 3, 4, 5],
-    [6, 2, 4, 3, 5],
-    [6, 2, 4, 4, 3, 3, 5],
-    [6, 2, 4, 4, 3, 5],
-    [6, 2, 4, 4, 5],
-    [6, 2, 4, 5],
-    [6, 2, 5]
+    [
+      1
+    ],
+    [
+      2,
+      3,
+      3,
+      4,
+      4,
+      5
+    ],
+    [
+      2,
+      3,
+      3,
+      4,
+      5
+    ],
+    [
+      2,
+      3,
+      3,
+      5
+    ],
+    [
+      2,
+      3,
+      4,
+      3,
+      4,
+      5
+    ],
+    [
+      2,
+      3,
+      4,
+      3,
+      5
+    ],
+    [
+      2,
+      3,
+      4,
+      4,
+      3,
+      5
+    ],
+    [
+      2,
+      3,
+      4,
+      4,
+      5
+    ],
+    [
+      2,
+      3,
+      4,
+      5
+    ],
+    [
+      2,
+      3,
+      5
+    ],
+    [
+      2,
+      4,
+      3,
+      3,
+      4,
+      5
+    ],
+    [
+      2,
+      4,
+      3,
+      3,
+      5
+    ],
+    [
+      2,
+      4,
+      3,
+      4,
+      3,
+      5
+    ],
+    [
+      2,
+      4,
+      3,
+      4,
+      5
+    ],
+    [
+      2,
+      4,
+      3,
+      5
+    ],
+    [
+      2,
+      4,
+      4,
+      3,
+      3,
+      5
+    ],
+    [
+      2,
+      4,
+      4,
+      3,
+      5
+    ],
+    [
+      2,
+      4,
+      4,
+      5
+    ],
+    [
+      2,
+      4,
+      5
+    ],
+    [
+      2,
+      5
+    ]
   ], `no more than maxNumberOfTraversal repetition for the same edge in a given path`);
 });
 

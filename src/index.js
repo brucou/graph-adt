@@ -15,7 +15,7 @@ export * from './types'
  * CONTRACT : vertex, edge must be object (because of WeakMap)
  */
 export function constructGraph(settings, edges, vertices) {
-  const { getEdgeTarget, getEdgeOrigin, constructEdge } = settings;
+  const { getEdgeTarget, getEdgeOrigin } = settings;
   // NOTE: we need a map, because weak map does not accept string, and for our use cases, we need to use string vertices
   const vertexMap = new Map();
   const edgeMap = new WeakMap();
@@ -49,7 +49,6 @@ export function constructGraph(settings, edges, vertices) {
     edges,
     getEdgeTarget,
     getEdgeOrigin,
-    constructEdge,
     clear : () => {vertexMap.clear(); outgoingEdges.clear(); incomingEdges.clear()}
   }
 }
@@ -59,11 +58,12 @@ export function constructGraph(settings, edges, vertices) {
  * conditions (`isTraversableEdge`), till a goal is reached (`isGoalReached`).
  * Search results are accumulated via a provided reducer function (`addSearchResult`).
  * @param {{store: Store, search: SearchSpecs, visit : VisitSpecs}} traversalSpecs
- * @param {Edge} startingEdge
+ * @param {Vertex} startingVertex
  * @param {Graph} graph
  * @returns {*} the accumulated result of the searches
  */
-export function searchGraphEdges(traversalSpecs, startingEdge, graph) {
+export function searchGraphEdges(traversalSpecs, startingVertex, graph) {
+  const {outgoingEdges} = graph;
   const { store, visit, search } = traversalSpecs;
   const { empty: storeConstructor, add, isEmpty } = store;
   const { initialPathTraversalState } = visit;
@@ -73,8 +73,10 @@ export function searchGraphEdges(traversalSpecs, startingEdge, graph) {
   // NOTE : having a constructor allows to build non-JSON objects.
   let graphTraversalState = initializeState(initialGoalEvalState);
   const emptyStore = initializeState(storeConstructor);
-  const initialStoreValue = { edge: startingEdge, pathTraversalState: initializeState(initialPathTraversalState) };
-  let currentStore = add([initialStoreValue], emptyStore);
+  const initialStoreValues = outgoingEdges(startingVertex).map(edge => {
+    return { edge, pathTraversalState: initializeState(initialPathTraversalState) }
+  })
+  let currentStore = add(initialStoreValues, emptyStore);
 
   while ( !isEmpty(currentStore) ) {
     const {
@@ -125,24 +127,24 @@ function traverseNext(store, traversalSpecs, graph, graphTraversalState) {
   }
 }
 
-export function breadthFirstTraverseGraphEdges(search, visit, startingEdge, graph) {
+export function breadthFirstTraverseGraphEdges(search, visit, startingVertex, graph) {
   const traversalSpecs = {
     store: queueStore,
     search,
     visit
   };
 
-  return searchGraphEdges(traversalSpecs, startingEdge, graph);
+  return searchGraphEdges(traversalSpecs, startingVertex, graph);
 }
 
-export function depthFirstTraverseGraphEdges(search, visit, startingEdge, graph) {
+export function depthFirstTraverseGraphEdges(search, visit, startingVertex, graph) {
   const traversalSpecs = {
     store: stackStore,
     search,
     visit
   };
 
-  return searchGraphEdges(traversalSpecs, startingEdge, graph);
+  return searchGraphEdges(traversalSpecs, startingVertex, graph);
 }
 
 // DOC : with this algorithm, traversing a graph like in
@@ -157,11 +159,9 @@ export function depthFirstTraverseGraphEdges(search, visit, startingEdge, graph)
  * @returns {Array}
  */
 export function findPathsBetweenTwoVertices(settings, graph, s, t) {
-  const { constructEdge } = graph;
   const { maxNumberOfTraversals, strategy } = settings;
-  const startingEdge = constructEdge(null, s);
   const search = {
-    initialGoalEvalState: { results: [], path : [] },
+    initialGoalEvalState: { results: [] },
     showResults : graphTraversalState => graphTraversalState.results,
     evaluateGoal: (edge, graph, pathTraversalState, graphTraversalState) => {
       const { results } = graphTraversalState;
@@ -198,7 +198,7 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
     [DFS]: depthFirstTraverseGraphEdges
   };
 
-  const allFoundPaths = traversalImpl[strategy || BFS](search, visit, startingEdge, graph);
+  const allFoundPaths = traversalImpl[strategy || BFS](search, visit, s, graph);
 
   return allFoundPaths
 }
