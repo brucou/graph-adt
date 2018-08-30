@@ -160,11 +160,6 @@ the contained edges.
 It is possible to configure the maximum number of occurrences of a given edge in a path. Sameness
  is defined by referential equality. The default value is set to 1 (no repetition of a given edge - this ensures loop-free paths). Settings that parameter to a value greater than 1 allows to have some control over the traversal of the graph cycles.
 
-**Note that because the search starts with a vertex and not an edge**, it is necessary to pass a 
-'fake' starting edge whose origin is a `null` vertex, and target is the starting vertex. As a 
-result, in any returned path the first edge will feature a `null` origin vertex. Keep that in 
-mind when using the returned paths : drop the first edge of the path.
-
 ## Algorithm
 We did not bother much with a sophisticated algorithm. A collection of search algorithms can be 
 found in the assets directory of this repository. We used an iterative, brute-force enumeration 
@@ -176,7 +171,7 @@ multi-edges. The algorithm can be found in
 `npm run test`
 
 # Tips and gotchas
-- edges which are not reachable from the starting edge won't be reached. That sounds obvious but 
+- edges which are not reachable from the starting vertex won't be reached. That sounds obvious but 
 it is easy to forget.
 - the `GraphTraversalState` can be used to implement early termination of the search. Typically 
 `visit` would update some flag in the graph traversal state, and `isTraversableEdge` would not 
