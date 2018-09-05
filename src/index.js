@@ -99,7 +99,6 @@ function traverseNext(store, traversalSpecs, graph, graphTraversalState) {
   const { evaluateGoal } = search;
   const { outgoingEdges: getOutgoingEdges, getEdgeTarget } = graph;
 
-  // TODO :  write VisitEdge the last edge (even when given the whole array)
   const { popped: edgeAndPaths, newStore } = takeAndRemoveOne(store);
   const { edge, pathTraversalState } = edgeAndPaths;
   const {
@@ -146,9 +145,6 @@ export function depthFirstTraverseGraphEdges(search, visit, startingVertex, grap
 
   return searchGraphEdges(traversalSpecs, startingVertex, graph);
 }
-
-// DOC : with this algorithm, traversing a graph like in
-// https://stackoverflow.com/questions/36488968/post-order-graph-traversal will leave the vertex 3 unscanned!
 
 /**
  *

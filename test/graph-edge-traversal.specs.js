@@ -1,5 +1,7 @@
 import * as QUnit from "qunitjs"
-import { constructGraph, DFS, findPathsBetweenTwoVertices } from "../src"
+import {
+  computeTimesCircledOn, constructGraph, depthFirstTraverseGraphEdges, DFS, findPathsBetweenTwoVertices
+} from "../src"
 
 const graphSettings = {
   getEdgeTarget: x => x.target,
@@ -643,4 +645,94 @@ QUnit.test("paths(s,t) : no paths!", function exec_test(assert) {
   const findPathSettings = { maxNumberOfTraversals: 2, strategy: DFS };
 
   assert.deepEqual(findPathsBetweenTwoVertices(findPathSettings, graph, vertex1, vertex3), [], `If there is no path between the two vertices, an empty array is returned`);
+});
+
+QUnit.test("depthFirstTraverseGraphEdges(search, visit, startingVertex, graph)", function exec_test(assert) {
+  const graphSettings = {
+    getEdgeOrigin: x => x.from,
+    getEdgeTarget: x => x.to,
+    constructEdge: (s, t) => ({ from: s, to: t })
+  };
+  const vertexINIT ='nok';
+  const vertexA ='A';
+  const vertexB ='B';
+  const vertexC ='C';
+  const vertexD ='D';
+  const vertexE ='E';
+  const vertices = [vertexINIT, vertexA, vertexB, vertexC, vertexD, vertexE];
+  const INIT_STATE = 'nok';
+  const INIT_EVENT = 'INIT';
+  const edges = [
+    { from: INIT_STATE, event: INIT_EVENT, to: 'A', },
+    { from: 'A', to: 'C', },
+    { from: 'A', to: 'B', },
+    { from: INIT_STATE, event: INIT_EVENT, to: 'A', },
+    { from: 'C', to: 'D', },
+    { from: 'B', to: 'D', },
+    { from: 'D', to: 'A', },
+    { from: 'D', to: 'E', },
+  ];
+  const maxNumberOfTraversals = 1;
+  const startingVertex = 'nok';
+  const target = 'E';
+  const graph = constructGraph(graphSettings, edges, vertices);
+  function isGoalReached(edge, graph, pathTraversalState, graphTraversalState) {
+    const { getEdgeTarget, getEdgeOrigin } = graph;
+    const lastPathVertex = getEdgeTarget(edge);
+    // Edge case : accounting for initial vertex
+    const vertexOrigin = getEdgeOrigin(edge);
+
+    const isGoalReached = vertexOrigin ? lastPathVertex === target : false;
+    return isGoalReached
+  }
+  function isTraversableEdge(edge, graph, pathTraversalState, graphTraversalState) {
+    return computeTimesCircledOn(pathTraversalState, edge) < (maxNumberOfTraversals || 1)
+  }
+  const search = {
+    initialGoalEvalState: { results: [] },
+    showResults: graphTraversalState => graphTraversalState.results,
+    evaluateGoal: (edge, graph, pathTraversalState, graphTraversalState) => {
+      const { results } = graphTraversalState;
+      const bIsGoalReached = isGoalReached(edge, graph, pathTraversalState, graphTraversalState);
+      const newResults = bIsGoalReached
+        ? pathTraversalState
+        : results;
+      const newGraphTraversalState = { results: newResults };
+
+      return {
+        isGoalReached: bIsGoalReached,
+        graphTraversalState: newGraphTraversalState
+      }
+    },
+  };
+  const visit = {
+    initialPathTraversalState: [],
+    visitEdge: (edge, graph, pathTraversalState, graphTraversalState) => {
+      return {
+        pathTraversalState: pathTraversalState.concat([edge]),
+        isTraversableEdge: isTraversableEdge(edge, graph, pathTraversalState, graphTraversalState)
+      }
+    }
+  };
+
+  const result = depthFirstTraverseGraphEdges(search, visit, startingVertex, graph);
+  assert.deepEqual(result, [
+    {
+      "event": "INIT",
+      "from": "nok",
+      "to": "A"
+    },
+    {
+      "from": "A",
+      "to": "B"
+    },
+    {
+      "from": "B",
+      "to": "D"
+    },
+    {
+      "from": "D",
+      "to": "E"
+    }
+  ], `...`);
 });
