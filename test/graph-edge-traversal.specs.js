@@ -666,7 +666,6 @@ QUnit.test("depthFirstTraverseGraphEdges(search, visit, startingVertex, graph)",
     { from: INIT_STATE, event: INIT_EVENT, to: 'A', },
     { from: 'A', to: 'C', },
     { from: 'A', to: 'B', },
-    { from: INIT_STATE, event: INIT_EVENT, to: 'A', },
     { from: 'C', to: 'D', },
     { from: 'B', to: 'D', },
     { from: 'D', to: 'A', },
@@ -695,7 +694,7 @@ QUnit.test("depthFirstTraverseGraphEdges(search, visit, startingVertex, graph)",
       const { results } = graphTraversalState;
       const bIsGoalReached = isGoalReached(edge, graph, pathTraversalState, graphTraversalState);
       const newResults = bIsGoalReached
-        ? pathTraversalState
+        ? results.concat([pathTraversalState])
         : results;
       const newGraphTraversalState = { results: newResults };
 
@@ -717,22 +716,35 @@ QUnit.test("depthFirstTraverseGraphEdges(search, visit, startingVertex, graph)",
 
   const result = depthFirstTraverseGraphEdges(search, visit, startingVertex, graph);
   assert.deepEqual(result, [
-    {
-      "event": "INIT",
-      "from": "nok",
-      "to": "A"
-    },
-    {
-      "from": "A",
-      "to": "B"
-    },
-    {
-      "from": "B",
-      "to": "D"
-    },
-    {
-      "from": "D",
-      "to": "E"
-    }
+    [
+      {        "event": "INIT",        "from": "nok",        "to": "A"      },
+      {        "from": "A",        "to": "C"      },
+      {        "from": "C",        "to": "D"      },
+      {        "from": "D",        "to": "A"      },
+      {        "from": "A",        "to": "B"      },
+      {        "from": "B",        "to": "D"      },
+      {        "from": "D",        "to": "E"      }
+    ],
+    [
+      {        "event": "INIT",        "from": "nok",        "to": "A"      },
+      {        "from": "A",        "to": "C"      },
+      {        "from": "C",        "to": "D"      },
+      {        "from": "D",        "to": "E"      }
+    ],
+    [
+      {        "event": "INIT",        "from": "nok",        "to": "A"      },
+      {        "from": "A",        "to": "B"      },
+      {        "from": "B",        "to": "D"      },
+      {        "from": "D",        "to": "A"      },
+      {        "from": "A",        "to": "C"      },
+      {        "from": "C",        "to": "D"      },
+      {        "from": "D",        "to": "E"      }
+    ],
+    [
+      {        "event": "INIT",        "from": "nok",        "to": "A"      },
+      {        "from": "A",        "to": "B"      },
+      {        "from": "B",        "to": "D"      },
+      {        "from": "D",        "to": "E"      }
+    ]
   ], `...`);
 });
