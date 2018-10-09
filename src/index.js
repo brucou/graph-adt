@@ -198,3 +198,18 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
 
   return allFoundPaths
 }
+
+export const ALL_PATHS_LIMITED_TO_N_LOOPS = ({maxNumberOfTraversals, targetVertex}) => ({
+  isTraversableEdge: (edge, graph, pathTraversalState, graphTraversalState) => {
+    return computeTimesCircledOn(pathTraversalState.path, edge) < (maxNumberOfTraversals || 1)
+  },
+  isGoalReached: (edge, graph, pathTraversalState, graphTraversalState) => {
+    const { getEdgeTarget, getEdgeOrigin } = graph;
+    const lastPathVertex = getEdgeTarget(edge);
+    // Edge case : accounting for initial vertex
+    const vertexOrigin = getEdgeOrigin(edge);
+
+    const isGoalReached = vertexOrigin ? lastPathVertex === targetVertex : false;
+    return isGoalReached
+  }
+});
