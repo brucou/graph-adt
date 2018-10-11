@@ -49,7 +49,11 @@ export function constructGraph(settings, edges, vertices) {
     edges,
     getEdgeTarget,
     getEdgeOrigin,
-    clear : () => {vertexMap.clear(); outgoingEdges.clear(); incomingEdges.clear()}
+    clear: () => {
+      vertexMap.clear();
+      outgoingEdges.clear();
+      incomingEdges.clear()
+    }
   }
 }
 
@@ -63,7 +67,7 @@ export function constructGraph(settings, edges, vertices) {
  * @returns {*} the accumulated result of the searches
  */
 export function searchGraphEdges(traversalSpecs, startingVertex, graph) {
-  const {outgoingEdges} = graph;
+  const { outgoingEdges } = graph;
   const { store, visit, search } = traversalSpecs;
   const { empty: storeConstructor, add, isEmpty } = store;
   const { initialPathTraversalState } = visit;
@@ -158,7 +162,7 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   const { maxNumberOfTraversals, strategy } = settings;
   const search = {
     initialGoalEvalState: { results: [] },
-    showResults : graphTraversalState => graphTraversalState.results,
+    showResults: graphTraversalState => graphTraversalState.results,
     evaluateGoal: (edge, graph, pathTraversalState, graphTraversalState) => {
       const { results } = graphTraversalState;
       const { getEdgeTarget, getEdgeOrigin } = graph;
@@ -199,7 +203,7 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   return allFoundPaths
 }
 
-export const ALL_PATHS_LIMITED_TO_N_LOOPS = ({maxNumberOfTraversals, targetVertex}) => ({
+export const ALL_n_TRANSITIONS = ({ maxNumberOfTraversals, targetVertex }) => ({
   isTraversableEdge: (edge, graph, pathTraversalState, graphTraversalState) => {
     return computeTimesCircledOn(pathTraversalState.path, edge) < (maxNumberOfTraversals || 1)
   },
@@ -212,4 +216,9 @@ export const ALL_PATHS_LIMITED_TO_N_LOOPS = ({maxNumberOfTraversals, targetVerte
     const isGoalReached = vertexOrigin ? lastPathVertex === targetVertex : false;
     return isGoalReached
   }
+});
+
+export const ALL_TRANSITIONS = ({ targetVertex }) => ALL_n_TRANSITIONS({
+  maxNumberOfTraversals: 1,
+  targetVertex
 });
