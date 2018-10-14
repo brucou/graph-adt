@@ -61,7 +61,54 @@ export function constructGraph(settings, edges, vertices) {
  * Starting from an initial edge, (brute-force) iteratively search the graph traversing edges which fulfill some
  * conditions (`isTraversableEdge`), till a goal is reached (`isGoalReached`).
  * Search results are accumulated via a provided reducer function (`addSearchResult`).
- * @param {{store: Store, search: SearchSpecs, visit : VisitSpecs}} traversalSpecs
+ * @param {{store: StoreInterface, search: SearchSpecs, visit : VisitSpecs}} traversalSpecs
+ * @param {Vertex} startingVertex
+ * @param {Graph} graph
+ * @returns {*} the accumulated result of the searches
+ */
+export function* searchGraphEdgesGenerator(traversalSpecs, startingVertex, graph) {
+  const { outgoingEdges } = graph;
+  const { store, visit, search } = traversalSpecs;
+  const { empty: storeConstructor, add, isEmpty } = store;
+  const { initialPathTraversalState } = visit;
+  const { initialGoalEvalState, showResults } = search;
+
+  // NOTE : having a constructor allows to build non-JSON objects.
+  let graphTraversalState = initializeState(initialGoalEvalState);
+  const emptyStore = initializeState(storeConstructor);
+  const initialStoreValues = outgoingEdges(startingVertex).map(edge => {
+    return { edge, pathTraversalState: initializeState(initialPathTraversalState) }
+  })
+  let currentStore = add(initialStoreValues, emptyStore);
+
+  while ( !isEmpty(currentStore) ) {
+    const {
+      graphTraversalState: newGraphTraversalState,
+      store: newStore
+    } = traverseNext(currentStore, traversalSpecs, graph, graphTraversalState);
+    currentStore = newStore;
+    graphTraversalState = newGraphTraversalState;
+  }
+
+  // TODO : have traverseNext return output : {isProduced: Boolean, value : *}
+  // so evaluateGoal : adds `output` to whatever it returns
+  // then in the while loop, yield the output if any
+  // TODO : update the tests : adding new field so should be easy to keep former tests running. Share same code for
+  // both generator and non-generator version
+  // NO!! only have a generator version!!! But then change ALL tests in state transducer... why not
+  // but do that in a separate branch!!
+
+
+  // NOTE : We do not have the possibility to clear ressources for the state we have created for each reducer
+  // function to manipulate. If possible, to avoid memory leaks, use `WeakMap` instead of `Map`, etc.
+  return showResults(graphTraversalState)
+}
+
+/**
+ * Starting from an initial edge, (brute-force) iteratively search the graph traversing edges which fulfill some
+ * conditions (`isTraversableEdge`), till a goal is reached (`isGoalReached`).
+ * Search results are accumulated via a provided reducer function (`addSearchResult`).
+ * @param {{store: StoreInterface, search: SearchSpecs, visit : VisitSpecs}} traversalSpecs
  * @param {Vertex} startingVertex
  * @param {Graph} graph
  * @returns {*} the accumulated result of the searches
@@ -72,7 +119,6 @@ export function searchGraphEdges(traversalSpecs, startingVertex, graph) {
   const { empty: storeConstructor, add, isEmpty } = store;
   const { initialPathTraversalState } = visit;
   const { initialGoalEvalState, showResults } = search;
-  let searchResults;
 
   // NOTE : having a constructor allows to build non-JSON objects.
   let graphTraversalState = initializeState(initialGoalEvalState);
@@ -218,6 +264,7 @@ export const ALL_n_TRANSITIONS = ({ maxNumberOfTraversals, targetVertex }) => ({
   }
 });
 
+// TODO !! this is not all transitions... this all paths where no transitions is repeated!! that is different
 export const ALL_TRANSITIONS = ({ targetVertex }) => ALL_n_TRANSITIONS({
   maxNumberOfTraversals: 1,
   targetVertex

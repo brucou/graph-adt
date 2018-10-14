@@ -36,12 +36,16 @@
  * @property {String} [strategy='BFS'] search strategy : depth-first or breadth-first (default)
  */
 /**
- * @typedef {Object} Store
- * @property {*} empty empty store or constructor for an empty store
- * @property {function (Array<>, Store) : ()} add adds values into a store
- * @property {function (Store) : *} takeAndRemoveOne empty store. removes one value from the store and returns that
- * value
- * @property {function (Store): Boolean} isEmpty predicate which returns true iff the store is empty
+ * @typedef {() => Store<P>} StoreFactory Store constructor
+ * @constructor
+ */
+/**
+ * @typedef {Object} StoreInterface
+ * @property {Store<P> | StoreFactory} empty empty store or constructor for an empty store
+ * @property {function (Array<P>, Store<P>) : Store<P>} add adds a list of values into a store
+ * @property {function (Store<P>) : {popped, newStore: Store<P>}} takeAndRemoveOne empty store. removes one value
+ * from the store and returns that value and the new store without that value
+ * @property {function (Store<P>): Boolean} isEmpty predicate which returns true iff the store is empty
  */
 
 /**
