@@ -46,6 +46,7 @@
  * @property {function (Store<P>) : {popped, newStore: Store<P>}} takeAndRemoveOne empty store. removes one value
  * from the store and returns that value and the new store without that value
  * @property {function (Store<P>): Boolean} isEmpty predicate which returns true iff the store is empty
+ * @template P
  */
 
 /**
@@ -55,8 +56,11 @@
  * function application.
  */
 /**
+ * @typedef {{value:*, isProduced:Boolean}} SearchOutput
+ */
+/**
  * @typedef {Object} SearchSpecs
- * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : {graphTraversalState : GraphTraversalState, isGoalReached : Boolean} } evaluateGoal predicate which assesses whether a given goal is reached, or if instead the search should continue. To assess the goal, the provided information is the edge being visited, and the current edge traversal state (roughly the sequence of edges visited so far). If the goal is reached, this means we have some results for the search, and those results are aggregated somewhere in the graph traversal state for posterior extraction through `showResults`.
+ * @property {function (Edge, Graph, PathTraversalState, GraphTraversalState) : {graphTraversalState : GraphTraversalState, isGoalReached : Boolean, output: SearchOutput} } evaluateGoal predicate which assesses whether a given goal is reached, or if instead the search should continue. To assess the goal, the provided information is the edge being visited, and the current edge traversal state (roughly the sequence of edges visited so far). If the goal is reached, this means we have some results for the search, and those results are aggregated somewhere in the graph traversal state for posterior extraction through `showResults`.
  * @property {*} initialGoalEvalState seed for the reducer associated to goal evaluation
  * @property {function (GraphTraversalState) : Search<Result>} showResults returns the accumulated results which
  * have been stored in the graph traversal state

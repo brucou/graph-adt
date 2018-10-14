@@ -64,7 +64,8 @@ export function constructGraph(settings, edges, vertices) {
  * @param {{store: StoreInterface, search: SearchSpecs, visit : VisitSpecs}} traversalSpecs
  * @param {Vertex} startingVertex
  * @param {Graph} graph
- * @returns {*} the accumulated result of the searches
+ * @generator
+ * @yields {*} maybe single results produced by the search and always as last value `showResults(graphTraversalState)`
  */
 export function* searchGraphEdgesGenerator(traversalSpecs, startingVertex, graph) {
   const { outgoingEdges } = graph;
@@ -79,13 +80,18 @@ export function* searchGraphEdgesGenerator(traversalSpecs, startingVertex, graph
   const initialStoreValues = outgoingEdges(startingVertex).map(edge => {
     return { edge, pathTraversalState: initializeState(initialPathTraversalState) }
   })
+  /** @type Store<{edge, pathTraversalState}>*/
   let currentStore = add(initialStoreValues, emptyStore);
 
   while ( !isEmpty(currentStore) ) {
     const {
       graphTraversalState: newGraphTraversalState,
-      store: newStore
+      store: newStore,
+      output
     } = traverseNext(currentStore, traversalSpecs, graph, graphTraversalState);
+
+    if (output && output.isProduced) yield output.value
+
     currentStore = newStore;
     graphTraversalState = newGraphTraversalState;
   }
@@ -98,8 +104,7 @@ export function* searchGraphEdgesGenerator(traversalSpecs, startingVertex, graph
   // NO!! only have a generator version!!! But then change ALL tests in state transducer... why not
   // but do that in a separate branch!!
 
-
-  // NOTE : We do not have the possibility to clear ressources for the state we have created for each reducer
+  // NOTE : We do not have the possibility to clear resources for the state we have created for each reducer
   // function to manipulate. If possible, to avoid memory leaks, use `WeakMap` instead of `Map`, etc.
   return showResults(graphTraversalState)
 }
@@ -142,6 +147,14 @@ export function searchGraphEdges(traversalSpecs, startingVertex, graph) {
   return showResults(graphTraversalState)
 }
 
+/**
+ *
+ * @param {Store<*>} store
+ * @param traversalSpecs
+ * @param {Graph} graph
+ * @param {GraphTraversalState} graphTraversalState
+ * @returns {{GraphTraversalState, store: *, output: SearchOutput|undefined}}
+ */
 function traverseNext(store, traversalSpecs, graph, graphTraversalState) {
   const { store: storeSpecs, search, visit } = traversalSpecs;
   const { add, takeAndRemoveOne } = storeSpecs;
@@ -163,6 +176,7 @@ function traverseNext(store, traversalSpecs, graph, graphTraversalState) {
   const {
     isGoalReached,
     graphTraversalState: newGraphTraversalState,
+    output
   } = evaluateGoal(edge, graph, newPathTraversalState, graphTraversalState);
   if (isGoalReached) {
     return { graphTraversalState: newGraphTraversalState, store: newStore }

@@ -1,6 +1,11 @@
+# Build
+- remounce parcel?
+  - can't do generators with it...
+
 # DOC
 - document properly searchEdges, or depthFirstTraverseGraphEdges, in particular search, visit, 
 store...
+- update types.js
 - document ALL_n_TRANSITIONS which is actually ALL_PATH_WITH_MAX_n_TRANSITIONS_REPEAT
 
 # Exotic searches
