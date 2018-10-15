@@ -1,7 +1,9 @@
 import * as QUnit from "qunitjs"
 import {
-  computeTimesCircledOn, constructGraph, depthFirstTraverseGraphEdges, DFS, findPathsBetweenTwoVertices
+  computeTimesCircledOn, constructGraph, depthFirstTraverseGraphEdges, DFS, findPathsBetweenTwoVertices,
+  searchGraphEdges, searchGraphEdgesGenerator, stackStore
 } from "../src"
+import { queueStore } from "../src/helpers"
 
 const graphSettings = {
   getEdgeTarget: x => x.target,
@@ -748,3 +750,126 @@ QUnit.test("depthFirstTraverseGraphEdges(search, visit, startingVertex, graph)",
     ]
   ], `...`);
 });
+
+QUnit.test("searchGraphEdges*(search, visit, startingVertex, graph)", function exec_test(assert) {
+  const graphSettings = {
+    getEdgeOrigin: x => x.from,
+    getEdgeTarget: x => x.to,
+    constructEdge: (s, t) => ({ from: s, to: t })
+  };
+  const vertexINIT ='nok';
+  const vertexA ='A';
+  const vertexB ='B';
+  const vertexC ='C';
+  const vertexD ='D';
+  const vertexE ='E';
+  const vertices = [vertexINIT, vertexA, vertexB, vertexC, vertexD, vertexE];
+  const INIT_STATE = 'nok';
+  const INIT_EVENT = 'INIT';
+  const edges = [
+    { from: INIT_STATE, event: INIT_EVENT, to: 'A', },
+    { from: 'A', to: 'C', },
+    { from: 'A', to: 'B', },
+    { from: 'C', to: 'D', },
+    { from: 'B', to: 'D', },
+    { from: 'D', to: 'A', },
+    { from: 'D', to: 'E', },
+  ];
+  const maxNumberOfTraversals = 1;
+  const startingVertex = 'nok';
+  const target = 'E';
+  const graph = constructGraph(graphSettings, edges, vertices);
+  function isGoalReached(edge, graph, pathTraversalState, graphTraversalState) {
+    const { getEdgeTarget, getEdgeOrigin } = graph;
+    const lastPathVertex = getEdgeTarget(edge);
+    // Edge case : accounting for initial vertex
+    const vertexOrigin = getEdgeOrigin(edge);
+
+    const isGoalReached = vertexOrigin ? lastPathVertex === target : false;
+    return isGoalReached
+  }
+  function isTraversableEdge(edge, graph, pathTraversalState, graphTraversalState) {
+    return computeTimesCircledOn(pathTraversalState, edge) < (maxNumberOfTraversals || 1)
+  }
+  /** @type SearchSpecs*/
+  const search = {
+    initialGoalEvalState: { results: [] },
+    showResults: graphTraversalState => graphTraversalState.results,
+    evaluateGoal: (edge, graph, pathTraversalState, graphTraversalState) => {
+      const { results } = graphTraversalState;
+      const bIsGoalReached = isGoalReached(edge, graph, pathTraversalState, graphTraversalState);
+      const newResults = bIsGoalReached
+        ? results.concat([pathTraversalState])
+        : results;
+      const newGraphTraversalState = { results: newResults };
+
+      return {
+        isGoalReached: bIsGoalReached,
+        graphTraversalState: newGraphTraversalState,
+        output : {isProduced : bIsGoalReached , value : pathTraversalState}
+      }
+    },
+  };
+  /** @type VisitSpecs*/
+  const visit = {
+    initialPathTraversalState: [],
+    visitEdge: (edge, graph, pathTraversalState, graphTraversalState) => {
+      return {
+        pathTraversalState: pathTraversalState.concat([edge]),
+        isTraversableEdge: isTraversableEdge(edge, graph, pathTraversalState, graphTraversalState)
+      }
+    }
+  };
+  const traversalSpecs = {
+    store: stackStore,
+    search,
+    visit
+  };
+
+  const resultIterator = searchGraphEdgesGenerator(traversalSpecs, startingVertex, graph);
+  const expectedResults = [
+    [
+      {        "event": "INIT",        "from": "nok",        "to": "A"      },
+      {        "from": "A",        "to": "C"      },
+      {        "from": "C",        "to": "D"      },
+      {        "from": "D",        "to": "A"      },
+      {        "from": "A",        "to": "B"      },
+      {        "from": "B",        "to": "D"      },
+      {        "from": "D",        "to": "E"      }
+    ],
+    [
+      {        "event": "INIT",        "from": "nok",        "to": "A"      },
+      {        "from": "A",        "to": "C"      },
+      {        "from": "C",        "to": "D"      },
+      {        "from": "D",        "to": "E"      }
+    ],
+    [
+      {        "event": "INIT",        "from": "nok",        "to": "A"      },
+      {        "from": "A",        "to": "B"      },
+      {        "from": "B",        "to": "D"      },
+      {        "from": "D",        "to": "A"      },
+      {        "from": "A",        "to": "C"      },
+      {        "from": "C",        "to": "D"      },
+      {        "from": "D",        "to": "E"      }
+    ],
+    [
+      {        "event": "INIT",        "from": "nok",        "to": "A"      },
+      {        "from": "A",        "to": "B"      },
+      {        "from": "B",        "to": "D"      },
+      {        "from": "D",        "to": "E"      }
+    ]
+  ];
+
+  let index = 0;
+  for (let path of resultIterator) {
+    assert.deepEqual(path, expectedResults[index++], `...`)
+  }
+});
+
+// TODO : also bfs, dfs will have to be written as generator (with return yield*, does that even work)
+// TODO : then the previous tests have to be written with the iterators but getting the return value of the iterator
+//  - can be wtitten with an helper
+// TODO : keep both versions, to avoid polyfill? YES, it is only 30 lines more, but yeah it is duplicated... so if I
+// change one, I should change the other... keep both for now, use only the generator, and see size impact of the
+// polifill. Or keep them in sync there is only one line difference between both code!!
+// TODO : BUT!! I would have to have duplicated versions of bfs, dfs too... mmm

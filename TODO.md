@@ -1,7 +1,7 @@
 # Build
 - remounce parcel?
   - can't do generators with it...
-
+- change build for run build, 'babel' is not recognized as an internal or external command,..
 # DOC
 - document properly searchEdges, or depthFirstTraverseGraphEdges, in particular search, visit, 
 store...

@@ -90,22 +90,14 @@ export function* searchGraphEdgesGenerator(traversalSpecs, startingVertex, graph
       output
     } = traverseNext(currentStore, traversalSpecs, graph, graphTraversalState);
 
-    if (output && output.isProduced) yield output.value
+    if (output && output.isProduced) {
+      yield output.value
+    }
 
     currentStore = newStore;
     graphTraversalState = newGraphTraversalState;
   }
 
-  // TODO : have traverseNext return output : {isProduced: Boolean, value : *}
-  // so evaluateGoal : adds `output` to whatever it returns
-  // then in the while loop, yield the output if any
-  // TODO : update the tests : adding new field so should be easy to keep former tests running. Share same code for
-  // both generator and non-generator version
-  // NO!! only have a generator version!!! But then change ALL tests in state transducer... why not
-  // but do that in a separate branch!!
-
-  // NOTE : We do not have the possibility to clear resources for the state we have created for each reducer
-  // function to manipulate. If possible, to avoid memory leaks, use `WeakMap` instead of `Map`, etc.
   return showResults(graphTraversalState)
 }
 
@@ -142,8 +134,6 @@ export function searchGraphEdges(traversalSpecs, startingVertex, graph) {
     graphTraversalState = newGraphTraversalState;
   }
 
-  // NOTE : We do not have the possibility to clear ressources for the state we have created for each reducer
-  // function to manipulate. If possible, to avoid memory leaks, use `WeakMap` instead of `Map`, etc.
   return showResults(graphTraversalState)
 }
 
@@ -179,7 +169,7 @@ function traverseNext(store, traversalSpecs, graph, graphTraversalState) {
     output
   } = evaluateGoal(edge, graph, newPathTraversalState, graphTraversalState);
   if (isGoalReached) {
-    return { graphTraversalState: newGraphTraversalState, store: newStore }
+    return { graphTraversalState: newGraphTraversalState, store: newStore, output }
   }
   else {
     const lastVertexOnEdgePath = getEdgeTarget(edge);

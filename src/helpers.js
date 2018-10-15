@@ -1,3 +1,6 @@
+export const BFS = 'BFS'
+export const DFS = 'DFS'
+
 /**
  *
  * @param {Vertex} s
@@ -52,6 +55,7 @@ export function computeTimesCircledOn(edgePath, edge) {
   return edgePath.reduce((acc, edgeInEdgePath) => edgeInEdgePath === edge ? acc + 1 : acc, 0);
 }
 
+/** @type StoreInterface*/
 export const queueStore = {
   empty: [],
   takeAndRemoveOne: store => ({popped : store[0], newStore: store.slice(1)}),
@@ -59,6 +63,7 @@ export const queueStore = {
   add: (subTrees, store) => store.concat(subTrees)
 }
 
+/** @type StoreInterface*/
 export const stackStore = {
   empty: [],
   takeAndRemoveOne: store => ({popped : store[0], newStore: store.slice(1)}),
@@ -71,5 +76,14 @@ export function initializeState(obj){
   return isFunction(obj) ? new (obj()) : obj;
 }
 
-export const BFS = 'BFS'
-export const DFS = 'DFS'
+export function getIteratorReturnValue(it){
+  let isDone = false;
+  let returnValue;
+  while (!isDone){
+    let {done, value} = it.next();
+    isDone = done;
+    returnValue = value;
+  }
+
+  return returnValue
+}
