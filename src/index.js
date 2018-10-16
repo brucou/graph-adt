@@ -246,7 +246,7 @@ export const ALL_n_TRANSITIONS = ({ maxNumberOfTraversals, targetVertex }) => ({
   }
 });
 
-// DOC : this has all transitions, but is not the minimal set
+// NOTE : this has all transitions, but is not the minimal set
 // There are potentially several sets, we produce a maximal set, so the user can pick up the subset he wants
 export const ALL_TRANSITIONS = ({ targetVertex }) => ALL_n_TRANSITIONS({
   maxNumberOfTraversals: 1,

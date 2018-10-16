@@ -257,7 +257,7 @@ results, and want to stop the iteration at discretion
   - property-based testing libraries ([jsverify](https://github.com/jsverify/jsverify), or 
   [jscheck](http://www.jscheck.org/))
 
-## Provided searched
+## Provided searches
 For the sake of our needs, we provided two parameter presets (`isTraversableEdge`, and `isGoalReached`):
 - `ALL_n_TRANSITIONS` : will reject edge paths which features more than `n` repetitions of any 
 given edge. A successful search is the one generating an edge path whose final edge has a given 
@@ -265,6 +265,12 @@ target vertex
 - `ALL_TRANSITIONS` : `ALL_n_TRANSITIONS` with n = 1.
 
 This is specific to our [state transducer library](https://github.com/brucou/state-transducer) and our need to automatically generate test sequences.
+
+In that context, note that `ALL_TRANSITIONS` helps enumerating a set of paths (input tests) 
+which includes all transitions from a given vertex to a target vertex. That set of paths however 
+is not the minimal set of such paths. It is in fact the maximal set. As there is no unicity of 
+the minimum set, we chose to enumerate the maximal set and let the user pick from that set the 
+sequences he favors. 
 
 ## Tests
 Tests can be run with `npm run test`
