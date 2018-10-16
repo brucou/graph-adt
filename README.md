@@ -253,8 +253,9 @@ The `searchGraphEdgesGenerator` follows the same algorithm as `searchGraphEdges`
 fact that when a search result is found, that result is yielded to the function caller. 
 `searchGraphEdgesGenerator` is indeed a generator, which when called returns an iterator. That 
 iterator, for each `next` call will return a new search result, till the enumeration is finished 
-(emptied store). For this function, the implicit contract that the search must terminate can be 
-relaxed.
+(emptied store). Note that the generator returns the list of all found results. As usual, the 
+return value of a generator cannot be retrieved in a `for..of` loop. We provide the  
+`getIteratorReturnValue` function to that purpose.
 
 We included this version of the search because :
 - for large graphs, or graph featuring loops, the enumeration may be expensive, and we might want
@@ -269,6 +270,10 @@ results, and want to stop the iteration at discretion
     the pull version of `rxjs`)
   - property-based testing libraries ([jsverify](https://github.com/jsverify/jsverify), or 
   [jscheck](http://www.jscheck.org/))
+
+### Contracts
+Same contracts as `searchGraphEdges`, except that the implicit contract that the search must 
+terminate can be relaxed.
 
 ## Provided searches
 For the sake of our needs, we provided two parameter presets (`isTraversableEdge`, and `isGoalReached`):
