@@ -254,7 +254,7 @@ fact that when a search result is found, that result is yielded to the function 
 `searchGraphEdgesGenerator` is indeed a generator, which when called returns an iterator. That 
 iterator, for each `next` call will return a new search result, till the enumeration is finished 
 (emptied store). Note that the generator returns the list of all found results. As usual, the 
-return value of a generator cannot be retrieved in a `for..of` loop. We provide the  
+return value of a generator cannot be retrieved in a `for..of` loop. We provide the 
 `getIteratorReturnValue` function to that purpose.
 
 We included this version of the search because :
