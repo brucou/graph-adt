@@ -1,15 +1,5 @@
 # Build
-- remounce parcel?
-  - can't do generators with it...
 - change build for run build, 'babel' is not recognized as an internal or external command,..
-- document the advantages of having a generator
-- think whether to keep both version (examine size impact)
-
-# DOC
-- document properly searchEdges, or depthFirstTraverseGraphEdges, in particular search, visit, 
-store...
-- update types.js
-- document ALL_n_TRANSITIONS which is actually ALL_PATH_WITH_MAX_n_TRANSITIONS_REPEAT
 
 # Exotic searches
 - store : empty, add, takeAndRemoveOne, isEmpty
