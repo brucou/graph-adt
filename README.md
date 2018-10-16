@@ -184,7 +184,7 @@ The function `findPathsBetweenTwoVertices` uses under the hood the search algori
 `searchGraphEdges`. `searchGraphEdges` returns results from the graph search starting from a 
 given vertex , based on the configuration passed in `TraversalSpecs`. 
 
-`TraversalSpecs` contains three properties (search, store, visit) respectively dictating what are 
+`TraversalSpecs` contains three properties (`search`, `store`, `visit`) respectively dictating what are 
 and how to build search results (for instance a result is a path between given origin and target 
 and is to be aggregated in an array), the traversal order (for instance breadth-first), and the 
 traversal criteria (for instance do not pass through the same edge twice).
@@ -206,10 +206,11 @@ state (`pathTraversalState`).
 The `store` property contains the following properties :
  
 For instance, for the `findPathsBetweenTwoVertices` function:
-- the store is a queue or a stack according to whether we want a BFS or DFS search
+- the store is a queue or a stack according to whether we want a `BFS` or `DFS` search
 - `visitEdge` accumulates all traversable edges in an array (with `initialPathTraversalState` 
-initially empty array), forming an edge path. A traversable edge being an edge such that when added
- to the current edge path, does not feature more than a given number (`maxNumberOfTraversals`) of edge repetition.
+initially an empty array), forming an edge path. A traversable edge being an edge such that when 
+added to the current edge path, does not feature more than a given number 
+(`maxNumberOfTraversals`) of edge repetition.
 - `isGoalReached` returns true iff the final edge of the current edge path is the target vertex. 
 `graphTraversalState`, initially an empty array (`initialGoalEvalState`, accumulates results, i.e
 . the paths we have found which fulfiil our search criteria). Finally `showResults` simply 
@@ -240,10 +241,12 @@ vertex
 
 ### Contracts
 The following contracts apply : type contracts, graph contracts, edge contracts, vertex contracts.
+
 We could consider it an implicit contract that the search must terminate, i.e. that the search 
 parameters (in particular `isGoalReached` and `isTraversableEdge`) have to be configured in a way 
 that the store eventually returns to being empty. This is not enforced but important as a graph 
 may have loops in which case the enumeration of edge paths would be infinite.
+
 
 ## searchGraphEdgesGenerator
 The `searchGraphEdgesGenerator` follows the same algorithm as `searchGraphEdges`, except for the 
@@ -287,10 +290,14 @@ Tests can be run with `npm run test`
 
 ## Examples
 Examples can be found in the [test directory](https://github.com/brucou/state-transducer/tree/master/test)
- 
+
 # Tips and gotchas
 - edges which are not reachable from the starting vertex won't be reached. That sounds obvious but 
 it is easy to forget.
 - the `GraphTraversalState` can be used to implement early termination of the search. Typically 
 `visit` would update some flag in the graph traversal state, and `isTraversableEdge` would not 
 produce any further edges after consulting that flag.
+
+# Related
+- [search-algorithms](http://hackage.haskell.org/package/search-algorithms)
+- [enumeration algorithms](https://www.springer.com/cda/content/document/cda_downloaddocument/9789462390966-c2.pdf?SGWID=0-0-45-1499691-p177134948)
