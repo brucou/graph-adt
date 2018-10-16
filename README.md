@@ -38,7 +38,7 @@ As such it is not and does not intend to be a all-purpose graph manipulation lib
  
  - enumeration of all edge paths between two vertices, with a configurable maximum for edge 
  repetition
- - generic BFS and DFS graph **edge** search, which can be customized to implement some of the 
+ - generic graph **edge** search, which can be customized to implement some of the 
  criteria presented thereabove
 
 This was chosen for pragmatic reasons. From this included algorithm, it is possible to implement 
