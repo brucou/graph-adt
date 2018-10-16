@@ -1,6 +1,7 @@
 import * as QUnit from "qunitjs"
 import {
-  computeTimesCircledOn, constructGraph, depthFirstTraverseGraphEdges, DFS, findPathsBetweenTwoVertices,
+  computeTimesCircledOn, constructGraph, depthFirstTraverseGraphEdges, DFS, DFS_STORE, findPathsBetweenTwoVertices,
+  getIteratorReturnValue,
   searchGraphEdges, searchGraphEdgesGenerator, stackStore
 } from "../src"
 import { queueStore } from "../src/helpers"
@@ -649,7 +650,7 @@ QUnit.test("paths(s,t) : no paths!", function exec_test(assert) {
   assert.deepEqual(findPathsBetweenTwoVertices(findPathSettings, graph, vertex1, vertex3), [], `If there is no path between the two vertices, an empty array is returned`);
 });
 
-QUnit.test("depthFirstTraverseGraphEdges(search, visit, startingVertex, graph)", function exec_test(assert) {
+QUnit.test("searchGraphEdges*(search, visit, startingVertex, graph) : return value", function exec_test(assert) {
   const graphSettings = {
     getEdgeOrigin: x => x.from,
     getEdgeTarget: x => x.to,
@@ -715,9 +716,14 @@ QUnit.test("depthFirstTraverseGraphEdges(search, visit, startingVertex, graph)",
       }
     }
   };
+  const traversalSpecs = {
+    store: DFS_STORE,
+    search,
+    visit
+  };
 
-  const result = depthFirstTraverseGraphEdges(search, visit, startingVertex, graph);
-  assert.deepEqual(result, [
+  const returnedValue = getIteratorReturnValue(searchGraphEdgesGenerator(traversalSpecs, startingVertex, graph));
+  assert.deepEqual(returnedValue, [
     [
       {        "event": "INIT",        "from": "nok",        "to": "A"      },
       {        "from": "A",        "to": "C"      },
@@ -748,7 +754,7 @@ QUnit.test("depthFirstTraverseGraphEdges(search, visit, startingVertex, graph)",
       {        "from": "B",        "to": "D"      },
       {        "from": "D",        "to": "E"      }
     ]
-  ], `...`);
+  ], `return value of generator is an array of the paths found`);
 });
 
 QUnit.test("searchGraphEdges*(search, visit, startingVertex, graph)", function exec_test(assert) {
@@ -821,7 +827,7 @@ QUnit.test("searchGraphEdges*(search, visit, startingVertex, graph)", function e
     }
   };
   const traversalSpecs = {
-    store: stackStore,
+    store: DFS_STORE,
     search,
     visit
   };
@@ -865,11 +871,3 @@ QUnit.test("searchGraphEdges*(search, visit, startingVertex, graph)", function e
     assert.deepEqual(path, expectedResults[index++], `...`)
   }
 });
-
-// TODO : also bfs, dfs will have to be written as generator (with return yield*, does that even work)
-// TODO : then the previous tests have to be written with the iterators but getting the return value of the iterator
-//  - can be wtitten with an helper
-// TODO : keep both versions, to avoid polyfill? YES, it is only 30 lines more, but yeah it is duplicated... so if I
-// change one, I should change the other... keep both for now, use only the generator, and see size impact of the
-// polifill. Or keep them in sync there is only one line difference between both code!!
-// TODO : BUT!! I would have to have duplicated versions of bfs, dfs too... mmm

@@ -45,6 +45,7 @@ This was chosen for pragmatic reasons. From this included algorithm, it is possi
 most of the above-mentioned coverage criteria.
  
 # API
+todo : update
 ## Types
 ```javascript
 /**
@@ -160,16 +161,117 @@ the contained edges.
 It is possible to configure the maximum number of occurrences of a given edge in a path. Sameness
  is defined by referential equality. The default value is set to 1 (no repetition of a given edge - this ensures loop-free paths). Settings that parameter to a value greater than 1 allows to have some control over the traversal of the graph cycles.
 
-## Algorithm
+## searchGraphEdges :: TraversalSpecs -> Vertex -> Graph -> SearchResults
+### Search algorithm
 We did not bother much with a sophisticated algorithm. A collection of search algorithms can be 
 found in the assets directory of this repository. We used an iterative, brute-force enumeration 
-algorithm, adapted for the need of enumerate **edges**, accounting for loops, cycles, and 
+algorithm, adapted for the need of enumerating **edges**, accounting for loops, cycles, and 
 multi-edges. The algorithm can be found in 
 [Enumeration algorithm, p14](https://www.springer.com/cda/content/document/cda_downloaddocument/9789462390966-c2.pdf?SGWID=0-0-45-1499691-p177134948) 
 
-## Tests
-`npm run test`
+### Description
+The function `findPathsBetweenTwoVertices` uses under the hood the search algorithm implemented by 
+`searchGraphEdges`. `searchGraphEdges` returns results from the graph search starting from a 
+given vertex , based on the configuration passed in `TraversalSpecs`. 
 
+`TraversalSpecs` contains three properties (search, store, visit) respectively dictating what are 
+and how to build search results (for instance a result is a path between given origin and target 
+and is to be aggregated in an array), the traversal order (for instance breadth-first), and the 
+traversal criteria (for instance do not pass through the same edge twice).
+
+The `search` property contains the following properties : `initialGoalEvalState`, `evaluateGoal`, 
+`showResults`, respectively specifying :
+- the initial value for the search state (generally an empty container of results)
+- when a search is successful (`isGoalReached`), what/if to output as a result (`output`), and the 
+update of the search state (`graphTraversalState`).
+- the final output of the search. This is generally a data structure containing all results.
+
+The `visit` property contains the following properties : `initialPathTraversalState`, 
+`visitEdge`, respectively specifying :
+- the initial value for the traversal state
+- whether a traversal candidate edge should indeed be traversed (`isTraversableEdge`) or 
+alternatively the search should backtrack, and the update of the traversal 
+state (`pathTraversalState`).
+
+The `store` property contains the following properties :
+ 
+For instance, for the `findPathsBetweenTwoVertices` function:
+- the store is a queue or a stack according to whether we want a BFS or DFS search
+- `visitEdge` accumulates all traversable edges in an array (with `initialPathTraversalState` 
+initially empty array), forming an edge path. A traversable edge being an edge such that when added
+ to the current edge path, does not feature more than a given number (`maxNumberOfTraversals`) of edge repetition.
+- `isGoalReached` returns true iff the final edge of the current edge path is the target vertex. 
+`graphTraversalState`, initially an empty array (`initialGoalEvalState`, accumulates results, i.e
+. the paths we have found which fulfiil our search criteria). Finally `showResults` simply 
+outputs the accumulated array. 
+
+As such, the `searchGraphEdges` is fairly generic, and can implement a large variety of 
+graph (edge) searches. Among the thing which can be done :
+- probabilistic searches, or prefix searches can be done by configuring the `store` property, all
+ else being equal
+
+The invariant part of the function, is that for any traversed edge, the outgoing edges from that 
+edge will be enumerated as potential traversable edges. What is a traversable edge and how those 
+edges are eventually accumulated into search results is the parameterizable part of the function. 
+
+### Semantics
+- we start with initializing the search state, the traversal state and an empty store
+- we start the enumeration with adding to the store the outgoing edges of the initial 
+vertex
+- for any edge in the store, we removed the edge from the store and visit it
+  - if the edge is not traversable, we continue reviewing edges in the store
+  - if the edge is traversable, it is traversed
+    - we evaluate if the search goal is reached
+      - if the search goal is reached, we update the search state and possibly compute and output 
+      the result of the search
+      - if the search goal is not reached, we add the outgoing edges for the traversed edge to 
+      the store, and update the traversal state 
+    - we continue reviewing edges in the store
+
+### Contracts
+The following contracts apply : type contracts, graph contracts, edge contracts, vertex contracts.
+We could consider it an implicit contract that the search must terminate, i.e. that the search 
+parameters (in particular `isGoalReached` and `isTraversableEdge`) have to be configured in a way 
+that the store eventually returns to being empty. This is not enforced but important as a graph 
+may have loops in which case the enumeration of edge paths would be infinite.
+
+## searchGraphEdgesGenerator
+The `searchGraphEdgesGenerator` follows the same algorithm as `searchGraphEdges`, except for the 
+fact that when a search result is found, that result is yielded to the function caller. 
+`searchGraphEdgesGenerator` is indeed a generator, which when called returns an iterator. That 
+iterator, for each `next` call will return a new search result, till the enumeration is finished 
+(emptied store). For this function, the implicit contract that the search must terminate can be 
+relaxed.
+
+We included this version of the search because :
+- for large graphs, or graph featuring loops, the enumeration may be expensive, and we might want
+ to instead process results one by one, instead of computing them synchronously and process the 
+ whole results
+  - this is typically the case for testing, where we want to have tests failing as soon as possible
+- in particular the enumeration may be infinite, and we might be interested in only some of the 
+results, and want to stop the iteration at discretion
+- we can interface it for further processing with :
+  - transducers 
+  - iterator combinators for processing (for instance [`ixjs`](https://github.com/ReactiveX/IxJS),
+    the pull version of `rxjs`)
+  - property-based testing libraries ([jsverify](https://github.com/jsverify/jsverify), or 
+  [jscheck](http://www.jscheck.org/))
+
+## Provided searched
+For the sake of our needs, we provided two parameter presets (`isTraversableEdge`, and `isGoalReached`):
+- `ALL_n_TRANSITIONS` : will reject edge paths which features more than `n` repetitions of any 
+given edge. A successful search is the one generating an edge path whose final edge has a given 
+target vertex
+- `ALL_TRANSITIONS` : `ALL_n_TRANSITIONS` with n = 1.
+
+This is specific to our [state transducer library](https://github.com/brucou/state-transducer) and our need to automatically generate test sequences.
+
+## Tests
+Tests can be run with `npm run test`
+
+## Examples
+Examples can be found in the [test directory](https://github.com/brucou/state-transducer/tree/master/test)
+ 
 # Tips and gotchas
 - edges which are not reachable from the starting vertex won't be reached. That sounds obvious but 
 it is easy to forget.

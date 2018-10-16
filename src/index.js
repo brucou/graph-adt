@@ -1,4 +1,4 @@
-import { BFS, computeTimesCircledOn, DFS, initializeState, print, queueStore, stackStore } from "./helpers"
+import { BFS, BFS_STORE, computeTimesCircledOn, DFS, DFS_STORE, initializeState, print } from "./helpers"
 
 export * from './types'
 export * from './properties'
@@ -181,33 +181,13 @@ function traverseNext(store, traversalSpecs, graph, graphTraversalState) {
 }
 
 export function breadthFirstTraverseGraphEdges(search, visit, startingVertex, graph) {
-  const traversalSpecs = {
-    store: queueStore,
-    search,
-    visit
-  };
-
-  return searchGraphEdges(traversalSpecs, startingVertex, graph);
+  return searchGraphEdges({ store: BFS_STORE, search, visit }, startingVertex, graph);
 }
 
 export function depthFirstTraverseGraphEdges(search, visit, startingVertex, graph) {
-  const traversalSpecs = {
-    store: stackStore,
-    search,
-    visit
-  };
-
-  return searchGraphEdges(traversalSpecs, startingVertex, graph);
+  return searchGraphEdges({ store: DFS_STORE, search, visit }, startingVertex, graph);
 }
 
-/**
- *
- * @param {FindPathSettings} settings
- * @param {Graph} graph
- * @param {Vertex} s origin vertex
- * @param {Vertex} t target vertex
- * @returns {Array}
- */
 export function findPathsBetweenTwoVertices(settings, graph, s, t) {
   const { maxNumberOfTraversals, strategy } = settings;
   const search = {
@@ -217,9 +197,9 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
       const { results } = graphTraversalState;
       const { getEdgeTarget, getEdgeOrigin } = graph;
       const lastPathVertex = getEdgeTarget(edge);
-      // Edge case : accounting for initial vertex
       const vertexOrigin = getEdgeOrigin(edge);
 
+      // Edge case : accounting for initial vertex
       const isGoalReached = vertexOrigin ? lastPathVertex === t : false;
 
       const newResults = isGoalReached
@@ -243,12 +223,10 @@ export function findPathsBetweenTwoVertices(settings, graph, s, t) {
       }
     }
   };
-  const traversalImpl = {
-    [BFS]: breadthFirstTraverseGraphEdges,
-    [DFS]: depthFirstTraverseGraphEdges
-  };
+  const store = { [BFS]: BFS_STORE, [DFS]: DFS_STORE };
+  const traversalSpecs = { store: store[strategy || BFS], visit, search };
 
-  const allFoundPaths = traversalImpl[strategy || BFS](search, visit, s, graph);
+  const allFoundPaths = searchGraphEdges(traversalSpecs, s, graph);
 
   return allFoundPaths
 }
@@ -268,7 +246,8 @@ export const ALL_n_TRANSITIONS = ({ maxNumberOfTraversals, targetVertex }) => ({
   }
 });
 
-// TODO !! this is not all transitions... this all paths where no transitions is repeated!! that is different
+// DOC : this has all transitions, but is not the minimal set
+// There are potentially several sets, we produce a maximal set, so the user can pick up the subset he wants
 export const ALL_TRANSITIONS = ({ targetVertex }) => ALL_n_TRANSITIONS({
   maxNumberOfTraversals: 1,
   targetVertex

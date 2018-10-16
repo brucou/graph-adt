@@ -2,6 +2,9 @@
 - remounce parcel?
   - can't do generators with it...
 - change build for run build, 'babel' is not recognized as an internal or external command,..
+- document the advantages of having a generator
+- think whether to keep both version (examine size impact)
+
 # DOC
 - document properly searchEdges, or depthFirstTraverseGraphEdges, in particular search, visit, 
 store...

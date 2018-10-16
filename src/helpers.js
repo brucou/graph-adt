@@ -72,6 +72,9 @@ export const stackStore = {
   add: (subTrees, store) => subTrees.concat(store)
 };
 
+export const BFS_STORE = queueStore;
+export const DFS_STORE = stackStore;
+
 export function initializeState(obj){
   return isFunction(obj) ? new (obj()) : obj;
 }
