@@ -79,6 +79,3 @@
 /**
  * @typedef {*} Result
  */
-/**
- * @typedef {*<*>} Search serves to aggregate results into a result container
- */
