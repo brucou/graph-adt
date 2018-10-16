@@ -1,3 +1,22 @@
+- [Motivation](#motivation)
+- [API](#api)
+  * [Types](#types)
+  * [Contracts](#contracts)
+  * [constructGraph :: EdgeADT -> Array<Edge> -> Array<Vertex> -> Graph](#constructgraph----edgeadt----array-edge-----array-vertex-----graph)
+  * [findPathsBetweenTwoVertices :: FindPathSettings -> Vertex -> Vertex -> Graph -> Array<EdgePath>](#findpathsbetweentwovertices----findpathsettings----vertex----vertex----graph----array-edgepath-)
+  * [searchGraphEdges :: TraversalSpecs -> Vertex -> Graph -> SearchResults](#searchgraphedges----traversalspecs----vertex----graph----searchresults)
+    + [Search algorithm](#search-algorithm)
+    + [Description](#description)
+    + [Semantics](#semantics)
+    + [Contracts](#contracts-1)
+  * [searchGraphEdgesGenerator](#searchgraphedgesgenerator)
+    + [Contracts](#contracts-2)
+  * [Provided searches](#provided-searches)
+  * [Tests](#tests)
+  * [Examples](#examples)
+- [Tips and gotchas](#tips-and-gotchas)
+- [Related](#related)
+
 # Motivation
 We had trouble finding a library for graph data structure which addresses our requirements. The 
 principal need and motivator for now is model-based testing (MBT): a reactive system is modelled 
