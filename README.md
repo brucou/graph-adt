@@ -265,7 +265,7 @@ We included this version of the search because :
 - in particular the enumeration may be infinite, and we might be interested in only some of the 
 results, and want to stop the iteration at discretion
 - we can interface it for further processing with :
-  - transducers 
+  - transducers (for instance [transducers-js](https://github.com/cognitect-labs/transducers-js))
   - iterator combinators for processing (for instance [`ixjs`](https://github.com/ReactiveX/IxJS),
     the pull version of `rxjs`)
   - property-based testing libraries ([jsverify](https://github.com/jsverify/jsverify), or 
