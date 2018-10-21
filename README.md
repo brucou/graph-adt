@@ -193,8 +193,8 @@ It is possible to configure the maximum number of occurrences of a given edge in
 ## searchGraphEdges :: TraversalSpecs -> Vertex -> Graph -> SearchResults
 ### Search algorithm
 We did not bother much with a sophisticated algorithm. A collection of search algorithms can be 
-found in the assets directory of this repository. We used an iterative, brute-force enumeration 
-algorithm, adapted for the need of enumerating **edges**, accounting for loops, cycles, and 
+found in the assets directory of this repository. We used an iterative version of a brute-force 
+enumeration algorithm, adapted for the need of enumerating **edges**, accounting for loops, cycles, and 
 multi-edges. The algorithm can be found in 
 [Enumeration algorithm, p14](https://www.springer.com/cda/content/document/cda_downloaddocument/9789462390966-c2.pdf?SGWID=0-0-45-1499691-p177134948) 
 
@@ -223,6 +223,11 @@ alternatively the search should backtrack, and the update of the traversal
 state (`pathTraversalState`).
 
 The `store` property contains the following properties :
+- `empty` : empty store
+- `add` : adds elements to the store
+- `takeAndRemoveOne`: remove an element from the store and returns a store with the same elements
+ except the removed element
+- `isEmpty`: predicate which returns true iff the store is empty
  
 For instance, for the `findPathsBetweenTwoVertices` function:
 - the store is a queue or a stack according to whether we want a `BFS` or `DFS` search
@@ -295,7 +300,8 @@ Same contracts as `searchGraphEdges`, except that the implicit contract that the
 terminate can be relaxed.
 
 ## Provided searches
-For the sake of our needs, we provided two parameter presets (`isTraversableEdge`, and `isGoalReached`):
+For the sake of our needs, we provided two parameter presets (a preset is a 
+configuration of `isTraversableEdge`, and `isGoalReached`):
 - `ALL_n_TRANSITIONS` : will reject edge paths which features more than `n` repetitions of any 
 given edge. A successful search is the one generating an edge path whose final edge has a given 
 target vertex
@@ -305,7 +311,7 @@ This is specific to our [state transducer library](https://github.com/brucou/sta
 
 In that context, note that `ALL_TRANSITIONS` helps enumerating a set of paths (input tests) 
 which includes all transitions from a given vertex to a target vertex. That set of paths however 
-is not the minimal set of such paths. It is in fact the maximal set. As there is no unicity of 
+is not the minimal set of such paths. It is in fact the **maximal set**. As there is no unicity of 
 the minimum set, we chose to enumerate the maximal set and let the user pick from that set the 
 sequences he favors. 
 

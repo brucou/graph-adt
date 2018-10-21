@@ -40,4 +40,6 @@
       traversable container:
       -  :: RandomNumber -> Store<Path> -> Path
 
-## turn search into generator
+## refactor
+as graph -> store iteration -> transducer -> output aggregation?
+in which case there may no longer be a need for generator!!
