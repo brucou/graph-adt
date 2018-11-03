@@ -20,9 +20,10 @@
 # Motivation
 We had trouble finding a library for graph data structure which addresses our requirements. The 
 principal need and motivator for now is model-based testing (MBT): a reactive system is modelled 
-as a state-machine, which itself can be modelled as a [multigraph](https://en.wikipedia.org/wiki/Multigraph). We could not find libraries which can handle multigraphs. To generate 
-input sequences for model testing, we need to examine the associated graph in a certain number 
-of ways. This library aims at gathering such ways.
+as a state-machine, which itself can be modelled as a [multidigraph](https://en.wikipedia.org/wiki/Multigraph#Directed_multigraph_(edges_without_own_identity)), or [quiver](https://en.wikipedia.org/wiki/Quiver_(mathematics)). 
+We could not find libraries which can handle such constructs. To generate input sequences for 
+model testing, we need to examine the associated graph in a certain number of ways. This library 
+aims at gathering such ways.
 
 As such it is not and does not intend to be a all-purpose graph manipulation library. It just has
  what we need for model-based testing. Typically, the model coverage criteria used in MBT for 

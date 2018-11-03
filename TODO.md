@@ -1,5 +1,21 @@
 # Build
-- change build for run build, 'babel' is not recognized as an internal or external command,..
+- ADD state for generator to deal with async actions
+  - Problem : an async response can arrive anytime with the machine in any state
+  ! so, we need additional transitions in the machine making up for that 
+  - a possibility by the way is to configure the machine to throw if an event arrives in a state 
+  it should not, but that still should not work - could receive the wrong response in the right 
+  state
+  - then those extra transitions must decide if they can be taken - typically a response can only
+   come after a request, so the gen must keep a log of request, decide if there is a response 
+   corresponding to a request which can be generated, updates the log, output the response if any
+   . That is a reducing logic (or two) on the generator state.
+     - initial generator state
+     - extra field with generator updates (delta) in same format than the machine
+     - and while I am doing that see if I can apply some transducer to this
+     - name : system state? generator state correspond to the necessity to keep track of the 
+     state of external system (no request, request received, response sent, etc. )
+       - or external state?
+! change build for run build, 'babel' is not recognized as an internal or external command,..
 
 # Exotic searches
 - store : empty, add, takeAndRemoveOne, isEmpty
