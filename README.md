@@ -168,12 +168,8 @@ A complete description should be :
 -  `source :: e -> V`, assigning to each edge its source node,
 -  `target :: e -> V`, assigning to each edge its target node.
 
-In order to keep the maximum generality, we are not imposing a concrete data structure for edges.
- This however means that the user must provide concrete realization for the edge abstract data
-  type. This includes in particular :
-  
-  - the two lensing functions `getEdgeOrigin` and `getEdgeTarget`, which return the origin and 
-  target vertices for any given edge
+This happens to coincide exactly with the signature of our graph constructor -- though instead of
+ sets, we use arrays.
 
 The array of vertices is mandatory, and must contain any and every vertex part of the graph. This
  means in particular that no edge can be based on vertices which do not figure in the passed vertex 
