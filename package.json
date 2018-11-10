@@ -16,6 +16,8 @@
     "dist/"
   ],
   "scripts": {
+    "prebuild": "rimraf dist",
+    "prepublish": "npm run umd",
     "serve": "nodemon index.js --exec babel-node",
     "test": "watchify -d -t [ babelify --presets [ @babel/preset-env ] ] test -o test/bundle.js -v",
     "build": "babel src --source-maps --out-dir dist-node",
