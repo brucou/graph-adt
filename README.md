@@ -17,6 +17,10 @@
 - [Tips and gotchas](#tips-and-gotchas)
 - [Related](#related)
 
+# Status
+- 0.7.0 is fine
+- 0.8.0 fails with babel (because of generators? to be investigated)
+ 
 # Motivation
 We had trouble finding a library for graph data structure which addresses our requirements. The 
 principal need and motivator for now is model-based testing (MBT): a reactive system is modelled 
