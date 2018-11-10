@@ -252,3 +252,24 @@ export const ALL_TRANSITIONS = ({ targetVertex }) => ALL_n_TRANSITIONS({
   maxNumberOfTraversals: 1,
   targetVertex
 });
+
+// DOC : goal is reached when the visited edge has the sought-for target, and the current path can no longer be
+// extended without containing `maxNumberOfTraversals` times the same edge.
+// This is useful when the `ALL_n_TRANSITIONS` stops exploring the graph because it already reached the target
+// vertex, and we want to continue exploring to the limit of `maxNumberOfTraversals`.
+export const ALL_n_TRANSITIONS_WITH_REPEATED_TARGET = ({ maxNumberOfTraversals, targetVertex }) => ({
+  isTraversableEdge: (edge, graph, pathTraversalState, graphTraversalState) => {
+    return computeTimesCircledOn(pathTraversalState.path, edge) < (maxNumberOfTraversals || 1)
+  },
+  isGoalReached: (edge, graph, pathTraversalState, graphTraversalState) => {
+    const { getEdgeTarget, getEdgeOrigin } = graph;
+    const lastPathVertex = getEdgeTarget(edge);
+    // Edge case : accounting for initial vertex
+    const vertexOrigin = getEdgeOrigin(edge);
+
+    const isGoalReached = vertexOrigin
+      ? lastPathVertex === targetVertex && !(computeTimesCircledOn(pathTraversalState.path, edge) < (maxNumberOfTraversals || 1))
+      : false;
+    return isGoalReached
+  }
+});
