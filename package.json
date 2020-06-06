@@ -1,6 +1,6 @@
 {
   "name": "graph-adt",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "Graph ADT library",
   "repository": {
     "type": "git",
@@ -25,9 +25,6 @@
     "umd": "rollup --sourcemap -c rollup.config.js",
     "webpack": "cross-env NODE_ENV=development webpack-dev-server --config webpack.config.js",
     "budo": "budo test/index.js --pushstate -- -t [ babelify --presets [ env ] ]"
-  },
-  "engines": {
-    "node": "6.3.0"
   },
   "author": "brucou",
   "license": "MIT",
